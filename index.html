@@ -3,56 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>محفظة RTC - تعدين مباشر</title>
+    <title>محفظة RTC - التعدين الألماني</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #1a1a1a; color: white; text-align: center; padding: 50px; }
-        .card { background: #2d2d2d; padding: 30px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,255,0,0.2); display: inline-block; }
-        h1 { color: #00ff00; }
-        .balance { font-size: 2.5em; margin: 20px 0; color: #fff; }
-        .status { color: #00ff00; font-weight: bold; }
-        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #00ff00; border-radius: 50%; width: 20px; height: 20px; animation: spin 2s linear infinite; display: inline-block; vertical-align: middle; margin-left: 10px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0d0d0d; color: white; text-align: center; padding: 40px; }
+        .card { background: #1a1a1a; padding: 40px; border-radius: 20px; border: 2px solid #00ff00; box-shadow: 0 0 30px rgba(0,255,0,0.1); display: inline-block; min-width: 300px; }
+        h1 { color: #00ff00; text-transform: uppercase; letter-spacing: 2px; }
+        .balance { font-size: 3em; margin: 25px 0; font-weight: bold; font-family: monospace; }
+        .status-box { margin-bottom: 20px; padding: 10px; border-radius: 10px; background: #262626; }
+        #status-text { color: #ff4444; font-weight: bold; }
+        .speed { color: #888; font-size: 0.9em; }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h1>تعدين عملة RTC المباشر</h1>
-        <p>حالة السيرفر الألماني: <span class="status">متصل ✅</span></p>
+        <h1>RTC MINER</h1>
+        
+        <div class="status-box">
+            حالة السيرفر: <span id="status-text">جاري الفحص...</span>
+        </div>
         
         <div class="balance">
-            <span id="rtc-balance">0.000000</span> RTC
+            <span id="rtc-balance">0.000000</span>
+            <div style="font-size: 0.4em; color: #00ff00;">RTC COIN</div>
         </div>
 
-        <p>سرعة التعدين: <span id="hashrate">1.2 MH/s</span> <div class="loader"></div></p>
+        <div class="speed">
+            قوة التعدين الحالية: 1.2 MH/s
+        </div>
     </div>
 
     <script>
-        // رابط السيرفر الخاص بك من Render
-        const SERVER_URL = 'https://rtc-miner-server.onrender.com/';
+        // الرابط المباشر لسيرفرك
+        const API_URL = 'https://rtc-miner-server.onrender.com/';
 
-        async function fetchMiningData() {
+        async function updateDashboard() {
+            const statusLabel = document.getElementById('status-text');
+            const balanceLabel = document.getElementById('rtc-balance');
+
             try {
-                const response = await fetch(SERVER_URL);
+                // جلب البيانات مع إضافة تذبذب عشوائي بسيط لمنع المتصفح من كاش البيانات القديمة
+                const response = await fetch(`${API_URL}?t=${Date.now()}`);
+                
+                if (!response.ok) throw new Error('Network response was not ok');
+                
                 const data = await response.json();
 
                 if (data.total_mined !== undefined) {
-                    // تحديث الرقم في الواجهة
-                    document.getElementById('rtc-balance').innerText = data.total_mined.toFixed(6);
-                    console.log("تم جلب البيانات: ", data.total_mined);
+                    // تحديث الواجهة عند النجاح
+                    balanceLabel.innerText = data.total_mined.toFixed(6);
+                    statusLabel.innerText = "متصل ونشط ✅";
+                    statusLabel.style.color = "#00ff00";
+                    console.log("Mining Update:", data.total_mined);
                 }
             } catch (error) {
-                console.error("فشل الاتصال بالسيرفر:", error);
-                document.querySelector('.status').innerText = "جاري إعادة الاتصال...";
-                document.querySelector('.status').style.color = "red";
+                // عند الفشل في الاتصال
+                console.error("Connection Error:", error);
+                statusLabel.innerText = "جاري إعادة الاتصال بالسيرفر...";
+                statusLabel.style.color = "#ff4444";
             }
         }
 
-        // تحديث البيانات كل 2 ثانية لضمان المزامنة
-        setInterval(fetchMiningData, 2000);
-
-        // تشغيل فوري عند التحميل
-        fetchMiningData();
+        // التحديث كل 3 ثوانٍ لمزامنة السيرفر الألماني
+        setInterval(updateDashboard, 3000);
+        
+        // تشغيل أولي
+        updateDashboard();
     </script>
 </body>
 </html>
