@@ -25,7 +25,7 @@
             width: 350px;
             box-shadow: 0 0 20px rgba(255, 49, 49, 0.2);
         }
-        h2 { color: var(--primary-red); margin-bottom: 20px; }
+        h2 { color: var(--primary-red); margin-bottom: 20px; letter-spacing: 2px; }
         .btn {
             background: var(--primary-red);
             color: white;
@@ -36,7 +36,9 @@
             font-weight: bold;
             width: 100%;
             font-size: 1rem;
+            transition: 0.3s;
         }
+        .btn:hover { background: #cc0000; box-shadow: 0 0 10px var(--primary-red); }
         .result {
             margin-top: 20px;
             display: none;
@@ -46,45 +48,52 @@
             border-radius: 5px;
             border: 1px dashed #444;
         }
-        .label { color: var(--primary-red); font-size: 0.8rem; display: block; }
-        .value { font-family: monospace; font-size: 0.9rem; word-break: break-all; color: #00ff00; }
-        .warning { color: #ffae00; font-size: 0.7rem; margin-top: 10px; display: block; }
+        .label { color: var(--primary-red); font-size: 0.8rem; display: block; margin-top: 10px; }
+        .value { font-family: monospace; font-size: 0.9rem; word-break: break-all; color: #00ff00; background: #111; padding: 5px; border-radius: 3px; }
+        .warning { color: #ffae00; font-size: 0.7rem; margin-top: 15px; display: block; border-top: 1px solid #222; padding-top: 10px; }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h2>انضم إلى شبكة RTC</h2>
-        <p style="font-size: 0.9rem; color: #ccc;">اضغط أدناه لتوليد هويتك الرقمية على البلوكشين</p>
+        <h2>شبكة RTC الرقمية</h2>
+        <p style="font-size: 0.9rem; color: #ccc;">أنشئ هويتك الآن لتلقي وإرسال عملات RTC</p>
         
-        <button class="btn" onclick="generateWallet()">إنشاء محفظة الآن 🚀</button>
+        <button class="btn" onclick="generateWallet()">توليد محفظة جديدة 🚀</button>
 
         <div id="result-box" class="result">
-            <span class="label">عنوان المحفظة (Public Address):</span>
+            <span class="label">عنوان المحفظة (Address):</span>
             <div id="addr" class="value"></div>
-            
-            <hr style="border: 0.5px solid #222; margin: 10px 0;">
             
             <span class="label">المفتاح الخاص (Private Key):</span>
             <div id="key" class="value"></div>
             
-            <span class="warning">⚠️ تحذير: لا تشارك المفتاح الخاص مع أحد، قم بتصوير الشاشة الآن!</span>
+            <span class="warning">⚠️ تنبيه: احفظ المفتاح الخاص في مكان آمن. من يملك المفتاح يملك الرصيد!</span>
         </div>
     </div>
 
     <script>
+        // الرابط الصحيح لسيرفرك
         const API_URL = 'https://rtc-miner-server.onrender.com';
 
         async function generateWallet() {
+            const btn = document.querySelector('.btn');
+            btn.innerText = "جاري التوليد...";
+            btn.disabled = true;
+
             try {
                 const response = await fetch(`${API_URL}/create_wallet`);
+                if (!response.ok) throw new Error();
                 const data = await response.json();
                 
                 document.getElementById('addr').innerText = data.address;
                 document.getElementById('key').innerText = data.private_key;
                 document.getElementById('result-box').style.display = 'block';
+                btn.innerText = "تم إنشاء المحفظة ✅";
             } catch (error) {
-                alert("السيرفر لا يستجيب، حاول لاحقاً");
+                alert("خطأ: تأكد أن السيرفر يعمل وحاول مرة أخرى.");
+                btn.innerText = "إنشاء محفظة جديدة 🚀";
+                btn.disabled = false;
             }
         }
     </script>
