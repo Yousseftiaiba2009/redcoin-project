@@ -52,3 +52,17 @@
     </script>
 </body>
 </html>
+<script>
+// وظيفة لإرسال إشارة للسيرفر كل 5 دقائق لمنعه من النوم
+function keepServerAlive() {
+    // هذا هو رابط سيرفرك في Render الذي أنشأته
+    const serverUrl = "https://rtc-miner-server.onrender.com"; 
+    
+    fetch(serverUrl)
+        .then(() => console.log("تم إرسال إشارة تنبيه للسيرفر بنجاح"))
+        .catch(err => console.log("فشل التنبيه، السيرفر قد يكون مشغولاً"));
+}
+
+// تشغيل الوظيفة تلقائياً كل 5 دقائق (300,000 ميلي ثانية)
+setInterval(keepServerAlive, 300000);
+</script>
