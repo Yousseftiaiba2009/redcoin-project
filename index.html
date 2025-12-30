@@ -66,3 +66,16 @@ function keepServerAlive() {
 // تشغيل الوظيفة تلقائياً كل 5 دقائق (300,000 ميلي ثانية)
 setInterval(keepServerAlive, 300000);
 </script>
+// حفظ الرصيد في ذاكرة الهاتف/المتصفح
+function saveBalance(amount) {
+    localStorage.setItem('rtc_balance', amount);
+}
+
+// استعادة الرصيد عند فتح الصفحة مجدداً
+function loadBalance() {
+    const saved = localStorage.getItem('rtc_balance');
+    return saved ? parseFloat(saved) : 0;
+}
+
+// عند بدء التشغيل، اجعل الرصيد يبدأ من القيمة المخزنة
+let currentBalance = loadBalance();
