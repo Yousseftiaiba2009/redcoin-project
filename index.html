@@ -3,88 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RTC Wallet | محفظة ريد كوين</title>
+    <title>Redcoin (RTC) Wallet</title>
     <style>
-        :root { --main-red: #ff0000; --bg-black: #0a0a0a; --card-bg: #161616; }
-        body { background-color: var(--bg-black); color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; }
-        .app-header { background-color: var(--main-red); width: 100%; padding: 20px 0; font-size: 22px; font-weight: bold; text-align: center; box-shadow: 0 4px 10px rgba(255, 0, 0, 0.3); }
-        .wallet-card { background: var(--card-bg); width: 90%; max-width: 400px; margin-top: 30px; border-radius: 20px; padding: 25px; border: 1px solid #333; box-sizing: border-box; }
-        .balance-label { color: #888; font-size: 14px; margin-bottom: 5px; }
-        .balance-amount { font-size: 42px; color: var(--main-red); font-weight: bold; margin-bottom: 10px; }
-        .status-tag { display: inline-block; background: #1b331b; color: #00ff00; padding: 5px 12px; border-radius: 50px; font-size: 12px; margin-bottom: 20px; }
-        .address-section { background: #000; padding: 15px; border-radius: 12px; border: 1px dashed #444; margin-top: 10px; }
-        .address-text { font-size: 11px; color: #aaa; word-break: break-all; font-family: monospace; }
-        .action-btn { background-color: var(--main-red); color: white; border: none; width: 100%; padding: 15px; border-radius: 12px; font-size: 16px; font-weight: bold; margin-top: 25px; cursor: pointer; transition: 0.3s; }
-        .action-btn:active { transform: scale(0.98); opacity: 0.8; }
+        body { background-color: #000; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background-color: #111; padding: 30px; border-radius: 20px; border: 1px solid #333; width: 90%; max-width: 400px; text-align: center; }
+        .header { background-color: red; color: white; padding: 10px; font-weight: bold; border-radius: 10px; margin-bottom: 20px; }
+        .balance-label { color: #888; font-size: 0.9em; }
+        .balance-value { color: red; font-size: 2.5em; font-weight: bold; margin: 15px 0; }
+        .status { background-color: rgba(0,255,0,0.1); color: #00ff00; padding: 5px 15px; border-radius: 20px; font-size: 0.8em; display: inline-block; }
+        .address-box { background: #000; padding: 15px; border-radius: 10px; margin-top: 20px; border: 1px dashed #444; word-break: break-all; font-size: 0.7em; color: #aaa; }
+        button { background: red; color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; margin-top: 20px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="app-header">REDCOIN (RTC)</div>
-
-    <div class="wallet-card">
+    <div class="card">
+        <div class="header">REDCOIN (RTC)</div>
+        
         <div class="balance-label">الرصيد المتوفر</div>
-        <div class="balance-amount" id="rtc-balance">0.0000</div>
-        <div class="status-tag" id="miner-status">● السيرفر الألماني متصل</div>
+        <div id="balance-value" class="balance-value">RTC 0.0000</div>
         
-        <div class="balance-label">عنوان المحفظة الخاص بك</div>
-        <div class="address-section">
-            <div class="address-text" id="wallet-addr">RTC_7x9B2kL4pQm8WzV5nRj3tX6yS1aD4fG9hJ0</div>
+        <div class="status">● السيرفر الألماني متصل</div>
+
+        <div class="address-box">
+            عنون المحفظة الخاص بك:<br>
+            <span id="wallet-addr">RTC_7x9B2kL4pQm8WzV5nRj3tX6yS1aD4fG9hJ0</span>
         </div>
-        
-        <button class="action-btn" onclick="copyAddr()">نسخ عنوان المحفظة</button>
+
+        <button onclick="copyAddress()">نسخ عنوان المحفظة</button>
     </div>
 
     <script>
-        // وظيفة نسخ العنوان
-        function copyAddr() {
-            const addr = document.getElementById('wallet-addr').innerText;
-            navigator.clipboard.writeText(addr);
-            alert("تم نسخ العنوان! ضعه في خانة Start Command في Render.");
+        // 1. إعدادات الرصيد والذاكرة
+        let balance = parseFloat(localStorage.getItem('rtc_balance')) || 0.0004;
+        const balanceDisplay = document.getElementById('balance-value');
+
+        // 2. دالة التحديث والحفظ
+        function updateMining() {
+            // إضافة قيمة صغيرة جداً لمحاكاة التعدين المستمر في ألمانيا
+            balance += 0.00001; 
+            
+            // عرض النتيجة وتنسيقها لـ 4 أرقام عشرية
+            balanceDisplay.innerText = "RTC " + balance.toFixed(4);
+            
+            // حفظ الرصيد الجديد في ذاكرة المتصفح/الهاتف
+            localStorage.setItem('rtc_balance', balance);
         }
 
-        // محاكاة استلام العملات من سيرفر التعدين (سنربطها برابط Render لاحقاً)
-        let balance = 0.0000;
-        setInterval(() => {
-            balance += 0.0002;
-            document.getElementById('rtc-balance').innerText = balance.toFixed(4) + " RTC";
-        }, 8000);
+        // 3. تشغيل المحرك كل ثانية (1000ms)
+        setInterval(updateMining, 1000);
+
+        // دالة النسخ
+        function copyAddress() {
+            const addr = document.getElementById('wallet-addr').innerText;
+            navigator.clipboard.writeText(addr);
+            alert("تم نسخ العنوان بنجاح!");
+        }
+
+        // عرض الرصيد المحفوظ فور فتح الصفحة
+        balanceDisplay.innerText = "RTC " + balance.toFixed(4);
     </script>
 </body>
 </html>
-<script>
-// وظيفة لإرسال إشارة للسيرفر كل 5 دقائق لمنعه من النوم
-function keepServerAlive() {
-    // هذا هو رابط سيرفرك في Render الذي أنشأته
-    const serverUrl = "https://rtc-miner-server.onrender.com"; 
-    
-    fetch(serverUrl)
-        .then(() => console.log("تم إرسال إشارة تنبيه للسيرفر بنجاح"))
-        .catch(err => console.log("فشل التنبيه، السيرفر قد يكون مشغولاً"));
-}
-
-// تشغيل الوظيفة تلقائياً كل 5 دقائق (300,000 ميلي ثانية)
-setInterval(keepServerAlive, 300000);
-</script>
-<script>
-    // 1. استعادة الرصيد من الذاكرة أو البدء من 0.0004 كما في صورتك
-    let balance = parseFloat(localStorage.getItem('rtc_balance')) || 0.0004;
-
-    function updateMining() {
-        // 2. المحرك: إضافة مقدار ضئيل من العملة كل ثانية (محاكاة للتعدين)
-        balance += 0.00001; 
-        
-        // 3. تحديث الواجهة: ابحث عن العنصر الذي يعرض الرقم
-        // تأكد أن العنصر في HTML لديه id="balance-value"
-        const display = document.getElementById('balance-value');
-        if (display) {
-            display.innerText = "RTC " + balance.toFixed(4);
-        }
-
-        // 4. الحفظ: تخزين الرقم الجديد في ذاكرة الهاتف
-        localStorage.setItem('rtc_balance', balance);
-    }
-
-    // تشغيل المحرك كل ثانية واحدة (1000 ميلي ثانية)
-    setInterval(updateMining, 1000);
-</script>
