@@ -7,21 +7,36 @@ import os
 app = Flask(__name__)
 CORS(app) 
 
+# إعدادات العملة
+START_BALANCE = 500000.0
+# تاريخ إطلاق العملة الحقيقي (Timestamp) - هذا يمنع التصفير
+# سنستخدم هذا الرقم كـ "احتياطي وقت" في حال ضاع ملف balance_db.txt
+BASE_TIMESTAMP = 1735568526 
+
 DB_FILE = "balance_db.txt"
 
 def load_balance():
+    # أولاً: محاولة القراءة من الملف
     if os.path.exists(DB_FILE):
         try:
             with open(DB_FILE, "r") as f:
                 content = f.read().strip()
-                return float(content) if content else 500000.0
+                if content:
+                    return float(content)
         except:
-            return 500000.0
-    return 500000.0
+            pass
+    
+    # ثانياً: إذا ضاع الملف (بسبب ريندر)، نحسب الرصيد بناءً على الوقت المار
+    # لكي لا يبدأ المستخدم من الصفر أبداً
+    passed_seconds = time.time() - BASE_TIMESTAMP
+    return START_BALANCE + (passed_seconds * 0.00005)
 
 def save_balance(val):
-    with open(DB_FILE, "w") as f:
-        f.write(str(val))
+    try:
+        with open(DB_FILE, "w") as f:
+            f.write(str(val))
+    except:
+        pass
 
 mining_data = {
     "rtc_total_mined": load_balance(),
@@ -33,9 +48,9 @@ def start_mining():
     while True:
         mining_data["rtc_total_mined"] += mining_data["mining_speed"]
         
-        # حفظ الرصيد في الملف كل 60 ثانية لتقليل الضغط على السيرفر
+        # حفظ الرصيد في الملف كل 30 ثانية
         save_counter += 1
-        if save_counter >= 60:
+        if save_counter >= 30:
             save_balance(mining_data["rtc_total_mined"])
             save_counter = 0
             
@@ -46,13 +61,14 @@ threading.Thread(target=start_mining, daemon=True).start()
 
 @app.route('/')
 def get_mining_status():
-    # حفظ فوري عند زيارة الرابط (أو زيارة الكرون جوب) لضمان الدقة
+    # الحفظ عند زيارة الرابط لضمان عدم ضياع أي لحظة
     save_balance(mining_data["rtc_total_mined"])
     return jsonify({
         "coin": "RTC",
         "status": "Mining Active",
-        "total_mined": round(mining_data["rtc_total_mined"], 8), # زيادة الدقة لـ 8 أرقام
-        "speed": mining_data["mining_speed"]
+        "total_mined": round(mining_data["rtc_total_mined"], 8),
+        "speed": mining_data["mining_speed"],
+        "founder": "Satoshi RTC"
     })
 
 if __name__ == "__main__":
