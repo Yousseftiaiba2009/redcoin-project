@@ -66,16 +66,32 @@ function keepServerAlive() {
 // تشغيل الوظيفة تلقائياً كل 5 دقائق (300,000 ميلي ثانية)
 setInterval(keepServerAlive, 300000);
 </script>
-// حفظ الرصيد في ذاكرة الهاتف/المتصفح
-function saveBalance(amount) {
+<script>
+  // دالة لحفظ الرصيد في ذاكرة الهاتف
+  function saveBalance(amount) {
     localStorage.setItem('rtc_balance', amount);
-}
+  }
 
-// استعادة الرصيد عند فتح الصفحة مجدداً
-function loadBalance() {
+  // دالة لاستعادة الرصيد عند فتح الصفحة
+  function loadBalance() {
     const saved = localStorage.getItem('rtc_balance');
     return saved ? parseFloat(saved) : 0;
-}
+  }
 
-// عند بدء التشغيل، اجعل الرصيد يبدأ من القيمة المخزنة
-let currentBalance = loadBalance();
+  // عند تحميل الصفحة
+  window.onload = function() {
+    let currentBalance = loadBalance();
+    
+    // تحديث الرقم في الواجهة فوراً (تأكد أن الـ ID هو balance-value)
+    const display = document.getElementById('balance-value');
+    if(display) {
+      display.innerText = currentBalance.toFixed(4);
+    }
+    
+    // حفظ الرصيد دورياً كلما زاد
+    setInterval(() => {
+        // هنا الكود الذي يزيد الرصيد لديك
+        // saveBalance(currentBalance); 
+    }, 5000);
+  };
+</script>
