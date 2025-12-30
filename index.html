@@ -3,65 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redcoin (RTC) Wallet</title>
+    <title>محفظة RTC - تعدين مباشر</title>
     <style>
-        body { background-color: #000; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background-color: #111; padding: 30px; border-radius: 20px; border: 1px solid #333; width: 90%; max-width: 400px; text-align: center; }
-        .header { background-color: red; color: white; padding: 10px; font-weight: bold; border-radius: 10px; margin-bottom: 20px; }
-        .balance-label { color: #888; font-size: 0.9em; }
-        .balance-value { color: red; font-size: 2.5em; font-weight: bold; margin: 15px 0; }
-        .status { background-color: rgba(0,255,0,0.1); color: #00ff00; padding: 5px 15px; border-radius: 20px; font-size: 0.8em; display: inline-block; }
-        .address-box { background: #000; padding: 15px; border-radius: 10px; margin-top: 20px; border: 1px dashed #444; word-break: break-all; font-size: 0.7em; color: #aaa; }
-        button { background: red; color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; margin-top: 20px; cursor: pointer; font-weight: bold; }
+        body { font-family: Arial, sans-serif; background-color: #1a1a1a; color: white; text-align: center; padding: 50px; }
+        .card { background: #2d2d2d; padding: 30px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,255,0,0.2); display: inline-block; }
+        h1 { color: #00ff00; }
+        .balance { font-size: 2.5em; margin: 20px 0; color: #fff; }
+        .status { color: #00ff00; font-weight: bold; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #00ff00; border-radius: 50%; width: 20px; height: 20px; animation: spin 2s linear infinite; display: inline-block; vertical-align: middle; margin-left: 10px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <div class="header">REDCOIN (RTC)</div>
+        <h1>تعدين عملة RTC المباشر</h1>
+        <p>حالة السيرفر الألماني: <span class="status">متصل ✅</span></p>
         
-        <div class="balance-label">الرصيد المتوفر</div>
-        <div id="balance-value" class="balance-value">RTC 0.0000</div>
-        
-        <div class="status">● السيرفر الألماني متصل</div>
-
-        <div class="address-box">
-            عنون المحفظة الخاص بك:<br>
-            <span id="wallet-addr">RTC_7x9B2kL4pQm8WzV5nRj3tX6yS1aD4fG9hJ0</span>
+        <div class="balance">
+            <span id="rtc-balance">0.000000</span> RTC
         </div>
 
-        <button onclick="copyAddress()">نسخ عنوان المحفظة</button>
+        <p>سرعة التعدين: <span id="hashrate">1.2 MH/s</span> <div class="loader"></div></p>
     </div>
 
     <script>
-        // 1. إعدادات الرصيد والذاكرة
-        let balance = parseFloat(localStorage.getItem('rtc_balance')) || 0.0004;
-        const balanceDisplay = document.getElementById('balance-value');
+        // رابط السيرفر الخاص بك من Render
+        const SERVER_URL = 'https://rtc-miner-server.onrender.com/';
 
-        // 2. دالة التحديث والحفظ
-        function updateMining() {
-            // إضافة قيمة صغيرة جداً لمحاكاة التعدين المستمر في ألمانيا
-            balance += 0.00001; 
-            
-            // عرض النتيجة وتنسيقها لـ 4 أرقام عشرية
-            balanceDisplay.innerText = "RTC " + balance.toFixed(4);
-            
-            // حفظ الرصيد الجديد في ذاكرة المتصفح/الهاتف
-            localStorage.setItem('rtc_balance', balance);
+        async function fetchMiningData() {
+            try {
+                const response = await fetch(SERVER_URL);
+                const data = await response.json();
+
+                if (data.total_mined !== undefined) {
+                    // تحديث الرقم في الواجهة
+                    document.getElementById('rtc-balance').innerText = data.total_mined.toFixed(6);
+                    console.log("تم جلب البيانات: ", data.total_mined);
+                }
+            } catch (error) {
+                console.error("فشل الاتصال بالسيرفر:", error);
+                document.querySelector('.status').innerText = "جاري إعادة الاتصال...";
+                document.querySelector('.status').style.color = "red";
+            }
         }
 
-        // 3. تشغيل المحرك كل ثانية (1000ms)
-        setInterval(updateMining, 1000);
+        // تحديث البيانات كل 2 ثانية لضمان المزامنة
+        setInterval(fetchMiningData, 2000);
 
-        // دالة النسخ
-        function copyAddress() {
-            const addr = document.getElementById('wallet-addr').innerText;
-            navigator.clipboard.writeText(addr);
-            alert("تم نسخ العنوان بنجاح!");
-        }
-
-        // عرض الرصيد المحفوظ فور فتح الصفحة
-        balanceDisplay.innerText = "RTC " + balance.toFixed(4);
+        // تشغيل فوري عند التحميل
+        fetchMiningData();
     </script>
 </body>
 </html>
