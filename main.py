@@ -126,3 +126,44 @@ def check_balance(address):
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 10000)))
+import time, threading, uuid, json, os
+from flask import Flask, jsonify, request
+from flask_cors import CORS 
+
+app = Flask(__name__)
+CORS(app) 
+
+# إعدادات المؤسس
+DB_FILE = "balance_db.txt"
+WALLETS_FILE = "wallets_db.json"
+FOUNDER_KEY = "RTC_ADMIN_2025_SECURE"
+
+def load_wallets():
+    if os.path.exists(WALLETS_FILE):
+        with open(WALLETS_FILE, 'r') as f: return json.load(f)
+    return {"RTC-FOUNDER-001": {"balance": 500000.0, "key": FOUNDER_KEY, "type": "Founder"}}
+
+wallets = load_wallets()
+
+def mining_worker():
+    while True:
+        wallets["RTC-FOUNDER-001"]["balance"] += 0.00005
+        if int(time.time()) % 30 == 0:
+            with open(WALLETS_FILE, 'w') as f: json.dump(wallets, f)
+        time.sleep(1)
+
+threading.Thread(target=mining_worker, daemon=True).start()
+
+@app.route('/')
+def status():
+    return jsonify({"founder_balance": round(wallets["RTC-FOUNDER-001"]["balance"], 6), "total_wallets": len(wallets)})
+
+@app.route('/create_wallet')
+def create():
+    addr = f"RTC-{str(uuid.uuid4())[:8].upper()}"
+    key = str(uuid.uuid4())[:12]
+    wallets[addr] = {"balance": 0.0, "key": key, "type": "User"}
+    return jsonify({"address": addr, "private_key": key})
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 10000)))
