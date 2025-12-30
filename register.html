@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RTC | إنشاء محفظة</title>
+    <style>
+        body { background: #0a0a0a; color: white; text-align: center; font-family: sans-serif; padding-top: 50px; }
+        .box { border: 2px solid #ff3131; padding: 30px; display: inline-block; border-radius: 15px; background: #111; width: 320px; box-shadow: 0 0 20px rgba(255,49,49,0.2); }
+        .btn { background: #ff3131; color: white; border: none; padding: 15px 30px; cursor: pointer; border-radius: 5px; font-weight: bold; width: 100%; transition: 0.3s; }
+        .btn:disabled { background: #555; }
+        .res { margin-top: 20px; display: none; background: #000; padding: 15px; border: 1px dashed #555; text-align: right; word-break: break-all; }
+        .val { color: #00ff00; font-family: monospace; display: block; margin-top: 5px; border: 1px solid #222; padding: 5px; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2 style="color:#ff3131; letter-spacing: 2px;">شبكة RTC PRO</h2>
+        <p style="color: #888;">اضغط لتوليد هويتك على البلوكشين</p>
+        
+        <button id="regBtn" class="btn" onclick="reg()">إنشاء محفظة جديدة 🚀</button>
+        
+        <div id="out" class="res">
+            <p style="color:#ff3131; font-size: 12px;">العنوان (Address):</p>
+            <span id="a" class="val"></span>
+            
+            <p style="color:#ff3131; font-size: 12px; margin-top:10px;">المفتاح (Private Key):</p>
+            <span id="k" class="val"></span>
+            
+            <p style="color:orange; font-size: 11px; margin-top:15px;">⚠️ تنبيه: صور الشاشة الآن. ضياع المفتاح يعني ضياع الرصيد!</p>
+        </div>
+    </div>
+
+    <script>
+        async function reg() {
+            const btn = document.getElementById('regBtn');
+            btn.disabled = true;
+            btn.innerText = "جاري الاتصال بالسيرفر...";
+            
+            try {
+                // محاولة الاتصال بالسيرفر
+                const r = await fetch('https://rtc-miner-server.onrender.com/create_wallet');
+                if (!r.ok) throw new Error("السيرفر لا يستجيب");
+                
+                const d = await r.json();
+                
+                document.getElementById('a').innerText = d.address;
+                document.getElementById('k').innerText = d.private_key;
+                document.getElementById('out').style.display = 'block';
+                btn.innerText = "تم التوليد بنجاح ✅";
+            } catch (e) {
+                alert("فشل التسجيل: تأكد من تشغيل سيرفر Render");
+                btn.disabled = false;
+                btn.innerText = "إنشاء محفظة جديدة 🚀";
+            }
+        }
+    </script>
+</body>
+</html>
