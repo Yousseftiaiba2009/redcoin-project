@@ -1,32 +1,34 @@
 import time
 import threading
-from flask import Flask
+from flask import Flask, jsonify
+from flask_cors import CORS 
 import os
 
 app = Flask(__name__)
+# تفعيل الـ CORS هو الذي سيجعل المحفظة تتصل وتظهر اللون الأخضر
+CORS(app) 
 
-# متغيرات عملة RTC
-rtc_total_mined = 0
-mining_speed = 0.0001  # سرعة التعدين لكل ثانية
+# إعدادات تعدين عملتك RTC
+mining_data = {
+    "rtc_total_mined": 0.0,
+    "mining_speed": 0.0001  # سرعة التعدين
+}
 
-def mine_rtc():
-    global rtc_total_mined
+def start_mining():
     while True:
-        # هنا تتم عملية "التعدين" الحسابية الخاصة بعملتك
-        rtc_total_mined += mining_speed
-        time.sleep(1) # السيرفر يعمل كل ثانية لزيادة الرصيد
+        mining_data["rtc_total_mined"] += mining_data["mining_speed"]
+        time.sleep(1)
 
-# تشغيل التعدين في الخلفية
-threading.Thread(target=mine_rtc, daemon=True).start()
+# تشغيل التعدين في خلفية السيرفر الألماني
+threading.Thread(target=start_mining, daemon=True).start()
 
 @app.route('/')
-def status():
-    return {
+def get_mining_status():
+    return jsonify({
         "coin": "RTC",
         "status": "Mining Active",
-        "total_mined": round(rtc_total_mined, 6),
-        "server": "Germany-Render"
-    }
+        "total_mined": round(mining_data["rtc_total_mined"], 6)
+    })
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
