@@ -35,7 +35,7 @@
             background: var(--card-bg);
             border: 2px solid var(--primary-red);
             border-radius: 25px;
-            padding: 50px;
+            padding: 40px;
             text-align: center;
             box-shadow: 0 0 50px rgba(255, 49, 49, 0.2);
             width: 400px;
@@ -46,7 +46,7 @@
             color: var(--primary-red);
             font-size: 1.8rem;
             letter-spacing: 5px;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             text-shadow: var(--text-glow);
         }
 
@@ -55,7 +55,7 @@
             border: 1px solid var(--primary-red);
             border-radius: 50px;
             font-size: 0.9rem;
-            margin-bottom: 35px;
+            margin-bottom: 25px;
             display: inline-flex;
             align-items: center;
             gap: 12px;
@@ -73,51 +73,68 @@
             100% { transform: scale(1); opacity: 1; }
         }
 
-        .balance-container {
-            margin: 20px 0;
-        }
-
         .balance {
             font-size: 3rem;
             font-weight: bold;
             font-family: 'Courier New', monospace;
             color: #ffffff;
-            text-shadow: 0 0 10px rgba(255,255,255,0.2);
+            margin: 10px 0;
         }
 
-        .coin-name {
-            color: var(--primary-red);
-            font-size: 1.2rem;
-            letter-spacing: 4px;
+        .btn-reg {
+            background: var(--primary-red);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
             font-weight: bold;
-            margin-top: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: 0.3s;
+            font-size: 1rem;
         }
 
-        .address-tag {
-            font-size: 0.75rem;
-            color: #777;
+        .btn-reg:hover { transform: scale(1.02); box-shadow: 0 0 20px var(--primary-red); }
+
+        /* نافذة التسجيل المنبثقة */
+        #modal {
+            display: none;
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
             background: #1a1a1a;
-            padding: 6px 12px;
+            border: 2px solid var(--primary-red);
+            padding: 30px;
+            border-radius: 20px;
+            z-index: 1000;
+            width: 320px;
+            box-shadow: 0 0 100px rgba(0,0,0,0.9);
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 999;
+        }
+
+        .res-box {
+            background: #000;
+            padding: 10px;
             border-radius: 8px;
-            margin-top: 15px;
-            display: inline-block;
-            border: 1px solid #333;
+            margin: 10px 0;
+            font-family: monospace;
+            word-break: break-all;
+            color: #00ff00;
+            font-size: 0.85rem;
+            text-align: left;
         }
 
-        .divider {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--primary-red), transparent);
-            margin: 35px 0;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            color: #888;
-            font-size: 0.8rem;
-        }
-
+        .divider { height: 1px; background: #333; margin: 20px 0; }
+        
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; color: #888; font-size: 0.8rem; }
         .stat-item span { color: white; display: block; font-size: 1.1rem; margin-top: 5px; font-weight: bold; }
     </style>
 </head>
@@ -133,11 +150,10 @@
             الحالة: <span id="status-text">جاري المزامنة...</span>
         </div>
         
-        <div class="balance-container">
-            <div id="rtc-balance" class="balance">0.000000</div>
-            <div class="coin-name">RTC COIN</div>
-            <div class="address-tag">FOUNDER: RTC-FOUNDER-001</div>
-        </div>
+        <div class="balance" id="rtc-balance">0.000000</div>
+        <div style="color:var(--primary-red); letter-spacing: 4px; font-weight: bold;">RTC COIN</div>
+
+        <button class="btn-reg" onclick="openModal()">إنشاء محفظة مستخدم 🚀</button>
 
         <div class="divider"></div>
 
@@ -147,40 +163,57 @@
         </div>
     </div>
 
+    <div class="overlay" id="overlay" onclick="closeModal()"></div>
+    <div id="modal">
+        <h3 style="color:var(--primary-red)">محفظة RTC جديدة</h3>
+        <p style="font-size: 0.8rem;">العنوان (Address):</p>
+        <div class="res-box" id="addr">...</div>
+        <p style="font-size: 0.8rem;">المفتاح (Private Key):</p>
+        <div class="res-box" id="key">...</div>
+        <p style="color:orange; font-size: 0.7rem;">⚠️ قم بتصوير الشاشة فوراً!</p>
+        <button class="btn-reg" onclick="closeModal()">إغلاق وحفظ ❌</button>
+    </div>
+
     <script>
-        // الرابط المباشر لسيرفرك
         const API_URL = 'https://rtc-miner-server.onrender.com'; 
 
+        // تحديث البيانات
         async function updateData() {
-            const balanceEl = document.getElementById('rtc-balance');
-            const statusText = document.getElementById('status-text');
-            const walletsEl = document.getElementById('wallets-count');
-            const dot = document.getElementById('status-dot');
-
             try {
-                // طلب البيانات مع طابع زمني لمنع التخزين المؤقت
                 const response = await fetch(`${API_URL}/?t=${Date.now()}`);
-                if (!response.ok) throw new Error();
-                
                 const data = await response.json();
-
-                // القراءة من الحقل الجديد الذي أضفناه للسيرفر
-                if (data.founder_balance !== undefined) {
-                    balanceEl.innerText = data.founder_balance.toFixed(6);
-                    walletsEl.innerText = data.total_wallets || "1";
-                    
-                    statusText.innerText = "متصل ونشط ✅";
-                    statusText.style.color = "#00ff00";
-                    dot.style.background = "#00ff00";
-                }
+                document.getElementById('rtc-balance').innerText = data.founder_balance.toFixed(6);
+                document.getElementById('wallets-count').innerText = data.total_wallets || "1";
+                document.getElementById('status-text').innerText = "متصل ونشط ✅";
+                document.getElementById('status-text').style.color = "#00ff00";
+                document.getElementById('status-dot').style.background = "#00ff00";
             } catch (e) {
-                statusText.innerText = "فشل الاتصال للسيرفر ❌";
-                statusText.style.color = "#ff3131";
-                dot.style.background = "#ff3131";
+                document.getElementById('status-text').innerText = "فشل الاتصال ❌";
+                document.getElementById('status-text').style.color = "#ff3131";
+                document.getElementById('status-dot').style.background = "#ff3131";
             }
         }
 
-        // تحديث كل ثانية لمتابعة التعدين اللحظي
+        // وظيفة التسجيل
+        async function openModal() {
+            const btn = document.querySelector('.btn-reg');
+            btn.innerText = "جاري التوليد...";
+            try {
+                const r = await fetch(`${API_URL}/create_wallet`);
+                const d = await r.json();
+                document.getElementById('addr').innerText = d.address;
+                document.getElementById('key').innerText = d.private_key;
+                document.getElementById('modal').style.display = 'block';
+                document.getElementById('overlay').style.display = 'block';
+                btn.innerText = "إنشاء محفظة مستخدم 🚀";
+            } catch (e) { alert("السيرفر لا يستجيب"); }
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }
+
         setInterval(updateData, 1000);
         updateData();
     </script>
