@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RTC Miner | واجهة المؤسس</title>
+    <title>RTC Miner | لوحة تحكم المؤسس</title>
     <style>
         :root {
             --primary-red: #ff3131;
             --dark-bg: #0a0a0a;
             --card-bg: #141414;
-            --text-glow: 0 0 10px rgba(255, 49, 49, 0.8);
+            --text-glow: 0 0 15px rgba(255, 49, 49, 0.8);
         }
 
         body {
@@ -27,92 +27,98 @@
         .bg-pattern {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, rgba(255, 49, 49, 0.07) 0%, transparent 70%);
+            background: radial-gradient(circle at center, rgba(255, 49, 49, 0.1) 0%, transparent 75%);
             z-index: -1;
         }
 
         .card {
             background: var(--card-bg);
-            border: 1px solid var(--primary-red);
-            border-radius: 20px;
-            padding: 40px;
+            border: 2px solid var(--primary-red);
+            border-radius: 25px;
+            padding: 50px;
             text-align: center;
-            box-shadow: 0 0 40px rgba(255, 49, 49, 0.15);
-            width: 380px;
+            box-shadow: 0 0 50px rgba(255, 49, 49, 0.2);
+            width: 400px;
             position: relative;
         }
 
         h1 {
             color: var(--primary-red);
-            font-size: 1.6rem;
-            letter-spacing: 4px;
-            margin-bottom: 25px;
+            font-size: 1.8rem;
+            letter-spacing: 5px;
+            margin-bottom: 30px;
             text-shadow: var(--text-glow);
         }
 
         .status-box {
-            background: rgba(255, 49, 49, 0.05);
-            border: 1px solid rgba(255, 49, 49, 0.3);
+            background: rgba(255, 49, 49, 0.1);
+            border: 1px solid var(--primary-red);
             border-radius: 50px;
-            font-size: 0.85rem;
-            margin-bottom: 30px;
+            font-size: 0.9rem;
+            margin-bottom: 35px;
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            padding: 8px 20px;
+            gap: 12px;
+            padding: 10px 25px;
         }
 
         .dot {
-            width: 10px; height: 10px; background: #ff3131; border-radius: 50%;
+            width: 12px; height: 12px; background: var(--primary-red); border-radius: 50%;
             animation: pulse 1.5s infinite;
         }
 
         @keyframes pulse {
             0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.5); opacity: 0.5; }
+            50% { transform: scale(1.6); opacity: 0.4; }
             100% { transform: scale(1); opacity: 1; }
         }
 
+        .balance-container {
+            margin: 20px 0;
+        }
+
         .balance {
-            font-size: 2.5rem;
+            font-size: 3rem;
             font-weight: bold;
             font-family: 'Courier New', monospace;
-            margin: 10px 0;
             color: #ffffff;
+            text-shadow: 0 0 10px rgba(255,255,255,0.2);
         }
 
         .coin-name {
             color: var(--primary-red);
-            font-size: 1rem;
-            letter-spacing: 3px;
+            font-size: 1.2rem;
+            letter-spacing: 4px;
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-top: 5px;
         }
 
-        .address-box {
-            font-size: 0.7rem;
-            color: #888;
+        .address-tag {
+            font-size: 0.75rem;
+            color: #777;
             background: #1a1a1a;
-            padding: 5px;
-            border-radius: 5px;
-            margin-top: 5px;
-            letter-spacing: 1px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: inline-block;
+            border: 1px solid #333;
         }
 
         .divider {
             height: 1px;
             background: linear-gradient(90deg, transparent, var(--primary-red), transparent);
-            margin: 25px 0;
+            margin: 35px 0;
         }
 
-        .footer-stats {
-            display: flex;
-            justify-content: space-around;
-            color: #666;
-            font-size: 0.75rem;
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            color: #888;
+            font-size: 0.8rem;
         }
 
-        .stat-val { color: white; display: block; font-size: 0.9rem; margin-top: 3px; }
+        .stat-item span { color: white; display: block; font-size: 1.1rem; margin-top: 5px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -120,62 +126,63 @@
     <div class="bg-pattern"></div>
 
     <div class="card">
-        <h1>RTC PRO MINER</h1>
+        <h1>RTC PRO SYSTEM</h1>
         
         <div class="status-box">
             <div class="dot" id="status-dot"></div>
-            الحالة: <span id="status-text">جاري مزامنة البلوكشين...</span>
+            الحالة: <span id="status-text">جاري المزامنة...</span>
         </div>
         
-        <div class="balance">
-            <span id="rtc-balance">0.000000</span>
+        <div class="balance-container">
+            <div id="rtc-balance" class="balance">0.000000</div>
             <div class="coin-name">RTC COIN</div>
-            <div class="address-box">RTC-FOUNDER-001</div>
+            <div class="address-tag">FOUNDER: RTC-FOUNDER-001</div>
         </div>
 
         <div class="divider"></div>
 
-        <div class="footer-stats">
-            <div>قوة التعدين <span class="stat-val">1.2 MH/s</span></div>
-            <div>المحافظ النشطة <span id="wallets-count" class="stat-val">1</span></div>
+        <div class="stats-grid">
+            <div class="stat-item">قوة الشبكة <span>1.2 MH/s</span></div>
+            <div class="stat-item">المحافظ النشطة <span id="wallets-count">1</span></div>
         </div>
     </div>
 
     <script>
-        // السطر الذي تم تعديله:
+        // الرابط المباشر لسيرفرك
         const API_URL = 'https://rtc-miner-server.onrender.com'; 
 
-        async function updateDashboard() {
-            const statusLabel = document.getElementById('status-text');
-            const balanceLabel = document.getElementById('rtc-balance');
-            const walletsLabel = document.getElementById('wallets-count');
+        async function updateData() {
+            const balanceEl = document.getElementById('rtc-balance');
+            const statusText = document.getElementById('status-text');
+            const walletsEl = document.getElementById('wallets-count');
             const dot = document.getElementById('status-dot');
 
             try {
-                // جلب البيانات من السيرفر
+                // طلب البيانات مع طابع زمني لمنع التخزين المؤقت
                 const response = await fetch(`${API_URL}/?t=${Date.now()}`);
-                if (!response.ok) throw new Error('Offline');
+                if (!response.ok) throw new Error();
                 
                 const data = await response.json();
 
-                // القراءة من founder_balance كما هو مسمى في الكود الشامل
+                // القراءة من الحقل الجديد الذي أضفناه للسيرفر
                 if (data.founder_balance !== undefined) {
-                    balanceLabel.innerText = data.founder_balance.toFixed(6);
-                    walletsLabel.innerText = data.total_active_wallets || "1";
+                    balanceEl.innerText = data.founder_balance.toFixed(6);
+                    walletsEl.innerText = data.total_wallets || "1";
                     
-                    statusLabel.innerText = "متصل ونشط ✅";
-                    statusLabel.style.color = "#00ff00";
+                    statusText.innerText = "متصل ونشط ✅";
+                    statusText.style.color = "#00ff00";
                     dot.style.background = "#00ff00";
                 }
-            } catch (error) {
-                statusLabel.innerText = "خطأ في الاتصال بالسيرفر ❌";
-                statusLabel.style.color = "#ff3131";
+            } catch (e) {
+                statusText.innerText = "فشل الاتصال للسيرفر ❌";
+                statusText.style.color = "#ff3131";
                 dot.style.background = "#ff3131";
             }
         }
 
-        setInterval(updateDashboard, 1000); 
-        updateDashboard();
+        // تحديث كل ثانية لمتابعة التعدين اللحظي
+        setInterval(updateData, 1000);
+        updateData();
     </script>
 </body>
 </html>
