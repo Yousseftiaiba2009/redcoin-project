@@ -3,71 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>محفظة RTC - التعدين الألماني</title>
+    <title>RTC Miner | واجهة المؤسس</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0d0d0d; color: white; text-align: center; padding: 40px; }
-        .card { background: #1a1a1a; padding: 40px; border-radius: 20px; border: 2px solid #00ff00; box-shadow: 0 0 30px rgba(0,255,0,0.1); display: inline-block; min-width: 300px; }
-        h1 { color: #00ff00; text-transform: uppercase; letter-spacing: 2px; }
-        .balance { font-size: 3em; margin: 25px 0; font-weight: bold; font-family: monospace; }
-        .status-box { margin-bottom: 20px; padding: 10px; border-radius: 10px; background: #262626; }
-        #status-text { color: #ff4444; font-weight: bold; }
-        .speed { color: #888; font-size: 0.9em; }
+        :root {
+            --primary-red: #ff3131;
+            --dark-bg: #0a0a0a;
+            --card-bg: #141414;
+            --text-glow: 0 0 10px rgba(255, 49, 49, 0.8);
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        /* تأثير الخلفية التقنية */
+        .bg-pattern {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, rgba(255, 49, 49, 0.07) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--primary-red);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(255, 49, 49, 0.15);
+            width: 360px;
+            position: relative;
+        }
+
+        h1 {
+            color: var(--primary-red);
+            font-size: 1.6rem;
+            letter-spacing: 4px;
+            margin-bottom: 25px;
+            text-shadow: var(--text-glow);
+        }
+
+        .status-box {
+            background: rgba(255, 49, 49, 0.05);
+            border: 1px solid rgba(255, 49, 49, 0.3);
+            padding: 10px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            margin-bottom: 30px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 20px;
+        }
+
+        .dot {
+            width: 10px; height: 10px; background: #ff3131; border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .balance {
+            font-size: 2.8rem;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            color: #ffffff;
+        }
+
+        .coin-name {
+            color: var(--primary-red);
+            font-size: 1rem;
+            letter-spacing: 3px;
+            font-weight: bold;
+        }
+
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary-red), transparent);
+            margin: 30px 0;
+        }
+
+        .footer-stats {
+            color: #666;
+            font-size: 0.8rem;
+        }
+
+        #status-text { color: #ff3131; font-weight: bold; }
     </style>
 </head>
 <body>
 
+    <div class="bg-pattern"></div>
+
     <div class="card">
-        <h1>RTC MINER</h1>
+        <h1>RTC PRO MINER</h1>
         
         <div class="status-box">
+            <div class="dot" id="status-dot"></div>
             حالة السيرفر: <span id="status-text">جاري الفحص...</span>
         </div>
         
         <div class="balance">
             <span id="rtc-balance">0.000000</span>
-            <div style="font-size: 0.4em; color: #00ff00;">RTC COIN</div>
+            <div class="coin-name">RTC COIN</div>
         </div>
 
-        <div class="speed">
-            قوة التعدين الحالية: 1.2 MH/s
+        <div class="divider"></div>
+
+        <div class="footer-stats">
+            قوة التعدين الحالية: <span style="color: white;">1.2 MH/s</span>
         </div>
     </div>
 
     <script>
-        // الرابط المباشر لسيرفرك
+        // الرابط الخاص بك (تأكد أنه هو نفسه المستخدم في سيرفرك)
         const API_URL = 'https://rtc-miner-server.onrender.com/';
 
         async function updateDashboard() {
             const statusLabel = document.getElementById('status-text');
             const balanceLabel = document.getElementById('rtc-balance');
+            const dot = document.getElementById('status-dot');
 
             try {
-                // جلب البيانات مع إضافة تذبذب عشوائي بسيط لمنع المتصفح من كاش البيانات القديمة
                 const response = await fetch(`${API_URL}?t=${Date.now()}`);
-                
-                if (!response.ok) throw new Error('Network response was not ok');
+                if (!response.ok) throw new Error('Offline');
                 
                 const data = await response.json();
 
                 if (data.total_mined !== undefined) {
-                    // تحديث الواجهة عند النجاح
                     balanceLabel.innerText = data.total_mined.toFixed(6);
                     statusLabel.innerText = "متصل ونشط ✅";
-                    statusLabel.style.color = "#00ff00";
-                    console.log("Mining Update:", data.total_mined);
+                    statusLabel.style.color = "#00ff00"; // أخضر عند العمل
+                    dot.style.background = "#00ff00";
                 }
             } catch (error) {
-                // عند الفشل في الاتصال
-                console.error("Connection Error:", error);
-                statusLabel.innerText = "جاري إعادة الاتصال بالسيرفر...";
-                statusLabel.style.color = "#ff4444";
+                statusLabel.innerText = "جاري إعادة الاتصال...";
+                statusLabel.style.color = "#ff3131";
+                dot.style.background = "#ff3131";
             }
         }
 
-        // التحديث كل 3 ثوانٍ لمزامنة السيرفر الألماني
-        setInterval(updateDashboard, 3000);
-        
-        // تشغيل أولي
+        setInterval(updateDashboard, 2000); // تحديث كل ثانيتين لمزامنة أسرع
         updateDashboard();
     </script>
 </body>
