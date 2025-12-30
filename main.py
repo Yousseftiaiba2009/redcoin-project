@@ -11,7 +11,7 @@ CORS(app)
 # إعدادات تعدين عملتك RTC
 mining_data = {
     "rtc_total_mined": 0.0,
-    "mining_speed": 277.77  # سرعة التعدين
+    "mining_speed": 0.0001  # سرعة التعدين
 }
 
 def start_mining():
