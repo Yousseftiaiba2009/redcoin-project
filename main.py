@@ -167,3 +167,26 @@ def create():
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 10000)))
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.json
+    key_input = data.get('private_key')
+    
+    # التحقق من مفتاح المؤسس أولاً
+    if key_input == FOUNDER_KEY:
+        return jsonify({
+            "status": "success",
+            "address": "RTC-FOUNDER-001",
+            "balance": wallets["RTC-FOUNDER-001"]["balance"]
+        })
+    
+    # البحث في باقي المحافظ
+    for addr, details in wallets.items():
+        if details.get('key') == key_input:
+            return jsonify({
+                "status": "success",
+                "address": addr,
+                "balance": details['balance']
+            })
+    
+    return jsonify({"error": "Invalid Key"}), 401
