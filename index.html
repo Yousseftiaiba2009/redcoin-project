@@ -1,26 +1,28 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redcoin RTC | محفظة العملات الصغيرة</title>
+    <title>Redcoin RTC | Micropayment Platform</title>
     <style>
         :root {
             --red-main: #e63946;
             --dark-bg: #0f0f12;
             --card-bg: #1a1a1f;
             --text-gray: #a0a0a0;
+            --gold: #FFD700;
         }
 
         body {
             background-color: var(--dark-bg);
             color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', sans-serif;
             margin: 0;
             padding: 20px;
+            text-align: left;
         }
 
-        /* الجزء العلوي - الهيدر */
+        /* Header Section */
         header {
             display: flex;
             justify-content: space-between;
@@ -34,52 +36,71 @@
             font-size: 24px;
             font-weight: bold;
             color: white;
+            text-decoration: none;
         }
 
         .logo-symbol {
             background: var(--red-main);
             color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            margin-left: 10px;
+            padding: 5px 12px;
+            border-radius: 6px;
+            margin-right: 10px;
         }
 
         .auth-buttons button {
-            padding: 8px 20px;
+            padding: 8px 22px;
             border-radius: 20px;
             border: none;
             cursor: pointer;
             font-weight: bold;
-            margin-right: 5px;
+            margin-left: 8px;
+            transition: 0.3s;
         }
 
         .btn-signup { background: var(--red-main); color: white; }
         .btn-login { background: #2a2a32; color: white; }
+        .btn-signup:hover { background: #ff4d5a; }
 
-        /* الواجهة الخارجية - رسالة الترحيب */
+        /* External Interface - Hero Card */
         .hero-card {
             background: linear-gradient(135deg, #2a0a0a 0%, #1a1a1f 100%);
             border: 1px solid #441111;
             border-radius: 15px;
             padding: 25px;
-            margin-bottom: 20px;
-            text-align: right;
+            margin-bottom: 25px;
         }
 
-        .hero-card h1 { color: var(--red-main); font-size: 28px; margin: 0; }
-        .hero-card p { color: var(--text-gray); font-size: 14px; }
+        .hero-card h1 { 
+            color: var(--red-main); 
+            font-size: 26px; 
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .hero-card p { color: var(--text-gray); font-size: 14px; margin-top: 10px; }
 
         .btn-play {
             background: var(--red-main);
             color: white;
             border: none;
-            padding: 10px 30px;
+            padding: 12px 35px;
             border-radius: 25px;
-            margin-top: 15px;
+            margin-top: 20px;
             cursor: pointer;
+            font-weight: bold;
         }
 
-        /* الواجهة الداخلية - لوحة البيانات */
+        /* Greeting Message */
+        .greeting-msg {
+            text-align: center;
+            color: var(--red-main);
+            font-weight: bold;
+            margin: 25px 0;
+            letter-spacing: 1px;
+            animation: pulse 2s infinite;
+        }
+
+        /* Internal Interface - User Dashboard */
         .dashboard-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -89,73 +110,63 @@
         .stat-card {
             background: var(--card-bg);
             border: 1px solid #2a2a32;
-            padding: 15px;
+            padding: 18px;
             border-radius: 12px;
         }
 
-        .stat-label { color: var(--text-gray); font-size: 12px; text-transform: uppercase; }
-        .stat-value { font-size: 20px; font-weight: bold; margin-top: 5px; }
+        .stat-label { color: var(--text-gray); font-size: 11px; text-transform: uppercase; font-weight: 600; }
+        .stat-value { font-size: 18px; font-weight: bold; margin-top: 8px; }
         .red-text { color: var(--red-main); }
 
-        /* رسالة تحيا */
-        .greeting-msg {
-            text-align: center;
-            color: var(--red-main);
-            font-weight: bold;
-            margin: 20px 0;
-            animation: pulse 2s infinite;
-        }
-
         @keyframes pulse {
-            0% { opacity: 0.6; }
-            50% { opacity: 1; }
-            100% { opacity: 0.6; }
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.7; }
         }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="logo">
+        <a href="#" class="logo">
             <span class="logo-symbol">R</span> Redcoin
-        </div>
+        </a>
         <div class="auth-buttons">
-            <button class="btn-signup">Sign Up</button>
             <button class="btn-login">Login</button>
+            <button class="btn-signup">Sign Up</button>
         </div>
     </header>
 
     <div class="hero-card">
-        <h1>منصة أرباح ومحفظة المدفوعات</h1>
-        <p>نظام Redcoin يوزع مكافآت يومية لعمال التعدين النشطين.</p>
-        <button class="btn-play">العب الآن</button>
+        <h1>Micropayment Wallet & <br>Earnings Platform</h1>
+        <p>Redcoin system distributes daily rewards for active miners and contributors.</p>
+        <button class="btn-play">Play Now</button>
     </div>
 
-    <div class="greeting-msg">تحيا Redcoin - مستقبل العملات الرقمية</div>
+    <div class="greeting-msg">LONG LIVE REDCOIN - THE FUTURE OF CRYPTO</div>
 
     <div class="dashboard-grid">
         <div class="stat-card">
-            <div class="stat-label">رصيد المحفظة</div>
+            <div class="stat-label">Wallet Balance</div>
             <div class="stat-value red-text" id="wallet-balance">1,250.8546 RTC</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">تم تعدينه اليوم</div>
+            <div class="stat-label">Mined Today</div>
             <div class="stat-value" id="mined-today">251.00 RD</div>
         </div>
     </div>
 
     <script>
-        // دالة لجلب البيانات الحقيقية من سيرفرك
         async function fetchBalance() {
             try {
+                // Fetching real data from your Render server
                 const response = await fetch('https://rtc-miner-server.onrender.com/');
                 const data = await response.json();
-                // تحديث الرصيد بناءً على بيانات السيرفر
                 if(data.balance) {
                     document.getElementById('wallet-balance').innerText = data.balance + " RTC";
                 }
             } catch (e) {
-                console.log("الواجهة تعمل في وضع العرض حالياً");
+                console.log("Interface running in demo mode.");
             }
         }
         fetchBalance();
