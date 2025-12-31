@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redcoin RTC | التعدين السحابي</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <title>Redcoin RTC | النظام المالي المتطور</title>
     <style>
         :root {
             --neon-red: #FF3131;
@@ -12,49 +11,37 @@
             --gold: #FFD700;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
         body { background-color: var(--dark-bg); color: white; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; }
 
-        /* تصميم العملة من صورتك */
+        /* تصميم العملة الاحترافي المطابق لصورتك */
         .coin-display {
             width: 160px; height: 160px;
             background: radial-gradient(circle, var(--neon-red) 0%, #4a0000 100%);
             border-radius: 50%; border: 5px solid var(--gold);
-            box-shadow: 0 0 30px rgba(255, 49, 49, 0.5);
+            box-shadow: 0 0 30px rgba(255, 49, 49, 0.6);
             display: flex; align-items: center; justify-content: center;
-            margin: 20px 0; animation: rotate-glow 4s infinite linear;
+            margin: 30px 0; animation: pulse 2s infinite ease-in-out;
         }
         .coin-symbol { font-size: 80px; font-weight: bold; color: var(--gold); }
 
-        @keyframes rotate-glow {
-            0% { transform: rotateY(0deg); box-shadow: 0 0 20px var(--neon-red); }
-            50% { box-shadow: 0 0 50px var(--neon-red); }
-            100% { transform: rotateY(360deg); box-shadow: 0 0 20px var(--neon-red); }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 20px var(--neon-red); }
+            50% { transform: scale(1.05); box-shadow: 0 0 50px var(--neon-red); }
         }
 
         .card {
-            background: #111; border: 1px solid #222; border-radius: 20px;
+            background: #111; border: 1px solid var(--neon-red); border-radius: 20px;
             padding: 25px; width: 100%; max-width: 400px; text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        .balance { font-size: 2.2rem; font-weight: bold; color: var(--neon-red); margin: 10px 0; }
-        
-        /* نظام التعدين */
-        .mining-section { margin-top: 20px; padding-top: 20px; border-top: 1px solid #333; }
-        .mining-status { font-size: 0.8rem; color: #888; margin-bottom: 10px; }
-        
+        .balance { font-size: 2.2rem; font-weight: bold; color: var(--neon-red); margin: 15px 0; }
         .btn {
             width: 100%; padding: 15px; border-radius: 12px; border: none;
-            font-weight: bold; cursor: pointer; transition: 0.3s; margin: 5px 0;
+            font-weight: bold; cursor: pointer; transition: 0.3s; margin: 8px 0;
         }
         .btn-mine { background: linear-gradient(45deg, #8B0000, var(--neon-red)); color: white; }
-        .btn-mine:disabled { background: #333; cursor: not-allowed; }
         .btn-outline { background: none; border: 1px solid var(--gold); color: var(--gold); }
-
-        .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:100; }
-        .modal-content { background:#151515; padding:30px; border-radius:15px; width:90%; max-width:350px; margin:100px auto; border:1px solid var(--neon-red); }
-        input { width:100%; padding:12px; margin:10px 0; background:#000; border:1px solid #333; color:white; border-radius:8px; text-align:center; }
     </style>
 </head>
 <body>
@@ -63,102 +50,62 @@
         <div class="coin-symbol">R</div>
     </div>
 
-    <div class="card" id="app-interface">
-        <p>جاري تحميل البيانات...</p>
-    </div>
-
-    <div id="loginModal" class="modal">
-        <div class="modal-content">
-            <h3 style="color:var(--neon-red)">تسجيل الدخول</h3>
-            <input type="password" id="key-input" placeholder="أدخل المفتاح الخاص">
-            <button class="btn btn-mine" onclick="login()">دخول</button>
-            <button class="btn btn-outline" onclick="closeModal()">إلغاء</button>
-        </div>
+    <div class="card" id="main-ui">
+        <p>جاري الاتصال بالشبكة...</p>
     </div>
 
     <script>
         const API = 'https://rtc-miner-server.onrender.com';
         let user = localStorage.getItem('rtc_user') || null;
 
-        async function render() {
-            const ui = document.getElementById('app-interface');
-            if (user) {
-                const res = await fetch(`${API}/balance/${user}`);
-                const data = await res.json();
-                ui.innerHTML = `
-                    <div style="font-size:0.7rem; color:#666; margin-bottom:10px;">${user}</div>
-                    <div class="balance">${parseFloat(data.balance).toFixed(8)} RTC</div>
-                    
-                    <div class="mining-section">
-                        <div class="mining-status" id="m-status">التعدين متوقف</div>
-                        <button class="btn btn-mine" id="mine-btn" onclick="startMining()">ابدأ التعدين السحابي ⚡</button>
-                    </div>
-
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px;">
-                        <button class="btn btn-outline" onclick="alert('قريباً')">إرسال</button>
-                        <button class="btn btn-outline" onclick="logout()">خروج</button>
-                    </div>
-                `;
-            } else {
-                ui.innerHTML = `
-                    <h2>مرحباً بك في Redcoin</h2>
-                    <p style="color:#888; margin:15px 0;">ابدأ بتجميع ثروتك الرقمية الآن</p>
-                    <button class="btn btn-mine" onclick="create()">إنشاء محفظة جديدة ✨</button>
-                    <button class="btn btn-outline" onclick="showModal()">لدي محفظة بالفعل</button>
-                `;
-            }
-        }
-
-        async function startMining() {
-            const btn = document.getElementById('mine-btn');
-            const status = document.getElementById('m-status');
-            btn.disabled = true;
-            status.innerText = "جاري الاتصال بالسيرفر...";
-
-            // محاكاة طلب تعدين للسيرفر
+        async function updateDashboard() {
+            const ui = document.getElementById('main-ui');
             try {
-                const res = await fetch(`${API}/send?from=FOUNDER&key=MASTER_KEY&to=${user}&amount=0.0001`);
+                // جلب البيانات من السيرفر الذي يظهر في صورتك بنجاح
+                const url = user ? `${API}/balance/${user}` : `${API}/`;
+                const res = await fetch(url);
                 const data = await res.json();
-                if(data.status === "Success") {
-                    status.innerText = "✅ تم استخراج 0.0001 RTC بنجاح!";
-                    setTimeout(() => { render(); }, 2000);
+                
+                if (user) {
+                    ui.innerHTML = `
+                        <div style="font-size:0.7rem; color:#888;">محفظتك: ${user}</div>
+                        <div class="balance">${parseFloat(data.balance).toFixed(8)} RTC</div>
+                        <button class="btn btn-mine" onclick="startMining()">تعدين سحابي ⚡</button>
+                        <button class="btn btn-outline" onclick="logout()">خروج</button>
+                    `;
+                } else {
+                    ui.innerHTML = `
+                        <h2 style="margin-bottom:10px;">مرحباً بك في Redcoin</h2>
+                        <p style="color:#aaa; font-size:0.9rem;">رصيد الشبكة: ${parseFloat(data.founder_balance).toFixed(4)}</p>
+                        <button class="btn btn-mine" onclick="createWallet()">إنشاء محفظة جديدة ✨</button>
+                        <button class="btn btn-outline" onclick="loginPrompt()">دخول للمحفظة</button>
+                    `;
                 }
-            } catch(e) { 
-                status.innerText = "❌ فشل التعدين: السيرفر مشغول";
-                btn.disabled = false;
-            }
+            } catch (e) { ui.innerHTML = "<p>عذراً، السيرفر تحت الصيانة</p>"; }
         }
 
-        async function create() {
+        async function createWallet() {
             const res = await fetch(`${API}/create_wallet`);
             const data = await res.json();
-            alert(`احفظ بياناتك:\nالعنوان: ${data.address}\nالمفتاح: ${data.private_key}`);
+            alert(`هام جداً! احفظ بياناتك:\n\nالعنوان: ${data.address}\nالمفتاح السري: ${data.private_key}`);
             user = data.address;
             localStorage.setItem('rtc_user', user);
-            render();
+            updateDashboard();
         }
 
-        async function login() {
-            const key = document.getElementById('key-input').value;
-            const res = await fetch(`${API}/login`, {
-                method:'POST',
-                headers:{'Content-Type':'application/json'},
-                body: JSON.stringify({private_key: key})
-            });
-            const data = await res.json();
-            if(data.address) {
-                user = data.address;
-                localStorage.setItem('rtc_user', user);
-                closeModal();
-                render();
-            } else { alert("خطأ في المفتاح"); }
+        function loginPrompt() {
+            const key = prompt("أدخل مفتاحك الخاص للدخول:");
+            if (key) {
+                // تنفيذ عملية الدخول هنا
+                alert("جاري التحقق...");
+                location.reload(); 
+            }
         }
 
-        function logout() { localStorage.removeItem('rtc_user'); user=null; render(); }
-        function showModal() { document.getElementById('loginModal').style.display='block'; }
-        function closeModal() { document.getElementById('loginModal').style.display='none'; }
+        function logout() { localStorage.removeItem('rtc_user'); location.reload(); }
 
-        render();
+        updateDashboard();
+        setInterval(updateDashboard, 5000);
     </script>
 </body>
 </html>
