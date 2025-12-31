@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redcoin RTC | النظام المالي المتطور</title>
+    <style>
+        :root {
+            --neon-red: #FF3131;
+            --dark-bg: #050505;
+            --gold: #FFD700;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
+        body { background-color: var(--dark-bg); color: white; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; }
+
+        /* تصميم العملة الاحترافي المطابق لصورتك */
+        .coin-display {
+            width: 160px; height: 160px;
+            background: radial-gradient(circle, var(--neon-red) 0%, #4a0000 100%);
+            border-radius: 50%; border: 5px solid var(--gold);
+            box-shadow: 0 0 30px rgba(255, 49, 49, 0.6);
+            display: flex; align-items: center; justify-content: center;
+            margin: 30px 0; animation: pulse 2s infinite ease-in-out;
+        }
+        .coin-symbol { font-size: 80px; font-weight: bold; color: var(--gold); }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 20px var(--neon-red); }
+            50% { transform: scale(1.05); box-shadow: 0 0 50px var(--neon-red); }
+        }
+
+        .card {
+            background: #111; border: 1px solid var(--neon-red); border-radius: 20px;
+            padding: 25px; width: 100%; max-width: 400px; text-align: center;
+        }
+
+        .balance { font-size: 2.2rem; font-weight: bold; color: var(--neon-red); margin: 15px 0; }
+        .btn {
+            width: 100%; padding: 15px; border-radius: 12px; border: none;
+            font-weight: bold; cursor: pointer; transition: 0.3s; margin: 8px 0;
+        }
+        .btn-mine { background: linear-gradient(45deg, #8B0000, var(--neon-red)); color: white; }
+        .btn-outline { background: none; border: 1px solid var(--gold); color: var(--gold); }
+    </style>
+</head>
+<body>
+
+    <div class="coin-display">
+        <div class="coin-symbol">R</div>
+    </div>
+
+    <div class="card" id="main-ui">
+        <p>جاري الاتصال بالشبكة...</p>
+    </div>
+
+    <script>
+        const API = 'https://rtc-miner-server.onrender.com';
+        let user = localStorage.getItem('rtc_user') || null;
+
+        async function updateDashboard() {
+            const ui = document.getElementById('main-ui');
+            try {
+                // جلب البيانات من السيرفر الذي يظهر في صورتك بنجاح
+                const url = user ? `${API}/balance/${user}` : `${API}/`;
+                const res = await fetch(url);
+                const data = await res.json();
+                
+                if (user) {
+                    ui.innerHTML = `
+                        <div style="font-size:0.7rem; color:#888;">محفظتك: ${user}</div>
+                        <div class="balance">${parseFloat(data.balance).toFixed(8)} RTC</div>
+                        <button class="btn btn-mine" onclick="startMining()">تعدين سحابي ⚡</button>
+                        <button class="btn btn-outline" onclick="logout()">خروج</button>
+                    `;
+                } else {
+                    ui.innerHTML = `
+                        <h2 style="margin-bottom:10px;">مرحباً بك في Redcoin</h2>
+                        <p style="color:#aaa; font-size:0.9rem;">رصيد الشبكة: ${parseFloat(data.founder_balance).toFixed(4)}</p>
+                        <button class="btn btn-mine" onclick="createWallet()">إنشاء محفظة جديدة ✨</button>
+                        <button class="btn btn-outline" onclick="loginPrompt()">دخول للمحفظة</button>
+                    `;
+                }
+            } catch (e) { ui.innerHTML = "<p>عذراً، السيرفر تحت الصيانة</p>"; }
+        }
+
+        async function createWallet() {
+            const res = await fetch(`${API}/create_wallet`);
+            const data = await res.json();
+            alert(`هام جداً! احفظ بياناتك:\n\nالعنوان: ${data.address}\nالمفتاح السري: ${data.private_key}`);
+            user = data.address;
+            localStorage.setItem('rtc_user', user);
+            updateDashboard();
+        }
+
+        function loginPrompt() {
+            const key = prompt("أدخل مفتاحك الخاص للدخول:");
+            if (key) {
+                // تنفيذ عملية الدخول هنا
+                alert("جاري التحقق...");
+                location.reload(); 
+            }
+        }
+
+        function logout() { localStorage.removeItem('rtc_user'); location.reload(); }
+
+        updateDashboard();
+        setInterval(updateDashboard, 5000);
+    </script>
+</body>
+</html>
