@@ -3,219 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RTC Miner | لوحة تحكم المؤسس</title>
+    <title>Redcoin RTC | النظام المالي العالمي</title>
     <style>
         :root {
-            --primary-red: #ff3131;
-            --dark-bg: #0a0a0a;
-            --card-bg: #141414;
-            --text-glow: 0 0 15px rgba(255, 49, 49, 0.8);
+            --red-main: #9e0d0d;
+            --neon-glow: #ff2b2b;
+            --gold: #ffd700;
+            --dark-space: #050505;
+            --card-bg: #111;
         }
 
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            background-color: var(--dark-bg);
+            background-color: var(--dark-space);
             color: white;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; padding-bottom: 80px;
         }
 
-        .bg-pattern {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, rgba(255, 49, 49, 0.1) 0%, transparent 75%);
-            z-index: -1;
+        /* تصميم العملة المتحرك */
+        .coin-box {
+            position: relative; width: 200px; height: 200px;
+            margin-top: 30px; display: flex; align-items: center; justify-content: center;
         }
-
-        .card {
-            background: var(--card-bg);
-            border: 2px solid var(--primary-red);
-            border-radius: 25px;
-            padding: 40px;
-            text-align: center;
-            box-shadow: 0 0 50px rgba(255, 49, 49, 0.2);
-            width: 400px;
-            position: relative;
+        .coin-visual {
+            width: 160px; height: 160px;
+            background: radial-gradient(circle, var(--neon-glow) 0%, var(--red-main) 100%);
+            border-radius: 50%; border: 5px double var(--gold);
+            box-shadow: 0 0 35px rgba(255, 43, 43, 0.4);
+            display: flex; align-items: center; justify-content: center;
+            animation: pulse 2.5s infinite ease-in-out;
         }
-
-        h1 {
-            color: var(--primary-red);
-            font-size: 1.8rem;
-            letter-spacing: 5px;
-            margin-bottom: 25px;
-            text-shadow: var(--text-glow);
-        }
-
-        .status-box {
-            background: rgba(255, 49, 49, 0.1);
-            border: 1px solid var(--primary-red);
-            border-radius: 50px;
-            font-size: 0.9rem;
-            margin-bottom: 25px;
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 25px;
-        }
-
-        .dot {
-            width: 12px; height: 12px; background: var(--primary-red); border-radius: 50%;
-            animation: pulse 1.5s infinite;
-        }
+        .coin-letter { font-size: 90px; font-weight: bold; color: var(--gold); }
 
         @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.6); opacity: 0.4; }
-            100% { transform: scale(1); opacity: 1; }
+            0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(255, 43, 43, 0.3); }
+            50% { transform: scale(1.03); box-shadow: 0 0 55px rgba(255, 43, 43, 0.6); }
         }
 
-        .balance {
-            font-size: 3rem;
-            font-weight: bold;
-            font-family: 'Courier New', monospace;
-            color: #ffffff;
-            margin: 10px 0;
+        /* لوحة التحكم الرئيسية */
+        .dashboard {
+            background: var(--card-bg); border: 1px solid var(--red-main);
+            border-radius: 20px; padding: 20px; width: 90%; max-width: 450px;
+            margin-top: 20px; text-align: center;
         }
+        .user-addr { font-size: 0.7rem; color: #888; background: #000; padding: 5px; border-radius: 5px; word-break: break-all; margin: 10px 0; }
+        .balance-val { font-size: 2.5rem; font-weight: bold; color: var(--neon-glow); }
 
-        .btn-reg {
-            background: var(--primary-red);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 20px;
-            transition: 0.3s;
-            font-size: 1rem;
+        /* الأزرار والمدخلات */
+        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .btn {
+            background: none; border: 1px solid var(--gold); color: var(--gold);
+            padding: 12px; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.3s;
         }
+        .btn:hover { background: var(--gold); color: black; }
+        .btn.primary { background: var(--red-main); border: none; color: white; }
 
-        .btn-reg:hover { transform: scale(1.02); box-shadow: 0 0 20px var(--primary-red); }
+        /* النوافذ المنبثقة */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; padding: 20px; }
+        .modal-content { background: var(--card-bg); border: 1px solid var(--gold); padding: 20px; border-radius: 15px; width: 100%; max-width: 400px; margin: 100px auto; }
+        input { width: 100%; padding: 12px; margin: 10px 0; background: #222; border: 1px solid #444; color: white; border-radius: 8px; }
 
-        /* نافذة التسجيل المنبثقة */
-        #modal {
-            display: none;
-            position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            background: #1a1a1a;
-            border: 2px solid var(--primary-red);
-            padding: 30px;
-            border-radius: 20px;
-            z-index: 1000;
-            width: 320px;
-            box-shadow: 0 0 100px rgba(0,0,0,0.9);
-        }
-
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 999;
-        }
-
-        .res-box {
-            background: #000;
-            padding: 10px;
-            border-radius: 8px;
-            margin: 10px 0;
-            font-family: monospace;
-            word-break: break-all;
-            color: #00ff00;
-            font-size: 0.85rem;
-            text-align: left;
-        }
-
-        .divider { height: 1px; background: #333; margin: 20px 0; }
-        
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; color: #888; font-size: 0.8rem; }
-        .stat-item span { color: white; display: block; font-size: 1.1rem; margin-top: 5px; font-weight: bold; }
+        .footer-nav { position: fixed; bottom: 0; width: 100%; background: #111; display: flex; justify-content: space-around; padding: 15px; border-top: 1px solid #333; }
     </style>
 </head>
 <body>
 
-    <div class="bg-pattern"></div>
+    <div class="coin-box">
+        <div class="coin-visual"><span class="coin-letter">R</span></div>
+    </div>
 
-    <div class="card">
-        <h1>RTC PRO SYSTEM</h1>
-        
-        <div class="status-box">
-            <div class="dot" id="status-dot"></div>
-            الحالة: <span id="status-text">جاري المزامنة...</span>
-        </div>
-        
-        <div class="balance" id="rtc-balance">0.000000</div>
-        <div style="color:var(--primary-red); letter-spacing: 4px; font-weight: bold;">RTC COIN</div>
+    <div class="dashboard" id="main-ui">
+        <p>جارِ تحميل بيانات الشبكة...</p>
+    </div>
 
-        <button class="btn-reg" onclick="openModal()">إنشاء محفظة مستخدم 🚀</button>
-
-        <div class="divider"></div>
-
-        <div class="stats-grid">
-            <div class="stat-item">قوة الشبكة <span>1.2 MH/s</span></div>
-            <div class="stat-item">المحافظ النشطة <span id="wallets-count">1</span></div>
+    <div id="sendModal" class="modal">
+        <div class="modal-content">
+            <h3>إرسال RTC</h3>
+            <input type="text" id="target-address" placeholder="عنوان المستلم">
+            <input type="number" id="send-amount" placeholder="الكمية">
+            <input type="password" id="private-key" placeholder="مفتاحك الخاص للتأكيد">
+            <button class="btn primary" onclick="processSend()">تأكيد الإرسال</button>
+            <button class="btn" onclick="closeModal()">إغلاق</button>
         </div>
     </div>
 
-    <div class="overlay" id="overlay" onclick="closeModal()"></div>
-    <div id="modal">
-        <h3 style="color:var(--primary-red)">محفظة RTC جديدة</h3>
-        <p style="font-size: 0.8rem;">العنوان (Address):</p>
-        <div class="res-box" id="addr">...</div>
-        <p style="font-size: 0.8rem;">المفتاح (Private Key):</p>
-        <div class="res-box" id="key">...</div>
-        <p style="color:orange; font-size: 0.7rem;">⚠️ قم بتصوير الشاشة فوراً!</p>
-        <button class="btn-reg" onclick="closeModal()">إغلاق وحفظ ❌</button>
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <h3>تسجيل الدخول</h3>
+            <input type="password" id="login-key" placeholder="أدخل مفتاحك الخاص">
+            <button class="btn primary" onclick="processLogin()">دخول آمن</button>
+            <button class="btn" onclick="closeModal()">إلغاء</button>
+        </div>
     </div>
 
     <script>
-        const API_URL = 'https://rtc-miner-server.onrender.com'; 
+        const API = 'https://rtc-miner-server.onrender.com';
+        let currentUser = localStorage.getItem('rtc_user_addr') || null;
 
-        // تحديث البيانات
-        async function updateData() {
-            try {
-                const response = await fetch(`${API_URL}/?t=${Date.now()}`);
-                const data = await response.json();
-                document.getElementById('rtc-balance').innerText = data.founder_balance.toFixed(6);
-                document.getElementById('wallets-count').innerText = data.total_wallets || "1";
-                document.getElementById('status-text').innerText = "متصل ونشط ✅";
-                document.getElementById('status-text').style.color = "#00ff00";
-                document.getElementById('status-dot').style.background = "#00ff00";
-            } catch (e) {
-                document.getElementById('status-text').innerText = "فشل الاتصال ❌";
-                document.getElementById('status-text').style.color = "#ff3131";
-                document.getElementById('status-dot').style.background = "#ff3131";
+        async function updateUI() {
+            const dashboard = document.getElementById('main-ui');
+            
+            if (currentUser) {
+                // واجهة المستخدم المسجل
+                try {
+                    const res = await fetch(`${API}/balance/${currentUser}`);
+                    const data = await res.json();
+                    dashboard.innerHTML = `
+                        <div class="user-addr">${currentUser}</div>
+                        <div class="balance-val">${parseFloat(data.balance).toFixed(6)} RTC</div>
+                        <div class="action-grid">
+                            <button class="btn primary" onclick="openModal('sendModal')">إرسال</button>
+                            <button class="btn" onclick="alert('عنوانك هو: '+currentUser)">استلام</button>
+                        </div>
+                        <button class="btn" style="margin-top:15px; width:100%; border-color:#555; color:#888;" onclick="logout()">تسجيل الخروج</button>
+                    `;
+                } catch (e) { dashboard.innerHTML = "<p>خطأ في الاتصال بالسيرفر</p>"; }
+            } else {
+                // واجهة الزائر
+                dashboard.innerHTML = `
+                    <h3>مرحباً بك في Redcoin</h3>
+                    <p style="color:#888; margin:10px 0;">أول عملة رقمية مبنية للقوة والسرعة</p>
+                    <div class="action-grid" style="grid-template-columns: 1fr;">
+                        <button class="btn primary" onclick="createNewWallet()">إنشاء محفظة جديدة ✨</button>
+                        <button class="btn" onclick="openModal('loginModal')">لدي محفظة بالفعل (دخول)</button>
+                    </div>
+                `;
             }
         }
 
-        // وظيفة التسجيل
-        async function openModal() {
-            const btn = document.querySelector('.btn-reg');
-            btn.innerText = "جاري التوليد...";
-            try {
-                const r = await fetch(`${API_URL}/create_wallet`);
-                const d = await r.json();
-                document.getElementById('addr').innerText = d.address;
-                document.getElementById('key').innerText = d.private_key;
-                document.getElementById('modal').style.display = 'block';
-                document.getElementById('overlay').style.display = 'block';
-                btn.innerText = "إنشاء محفظة مستخدم 🚀";
-            } catch (e) { alert("السيرفر لا يستجيب"); }
+        async function createNewWallet() {
+            const res = await fetch(`${API}/create_wallet`);
+            const data = await res.json();
+            alert(`✅ تم إنشاء محفظتك!\n\nالعنوان: ${data.address}\nالمفتاح الخاص: ${data.private_key}\n\n⚠️ هام: احفظ المفتاح الخاص في مكان آمن، لن يظهر مرة أخرى!`);
+            currentUser = data.address;
+            localStorage.setItem('rtc_user_addr', data.address);
+            updateUI();
         }
 
-        function closeModal() {
-            document.getElementById('modal').style.display = 'none';
-            document.getElementById('overlay').style.display = 'none';
+        async function processLogin() {
+            const key = document.getElementById('login-key').value;
+            const res = await fetch(`${API}/login`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ private_key: key })
+            });
+            const data = await res.json();
+            if (data.address) {
+                currentUser = data.address;
+                localStorage.setItem('rtc_user_addr', data.address);
+                closeModal();
+                updateUI();
+            } else { alert("المفتاح الخاص غير صحيح!"); }
         }
 
-        setInterval(updateData, 1000);
-        updateData();
+        async function processSend() {
+            const to = document.getElementById('target-address').value;
+            const amount = document.getElementById('send-amount').value;
+            const key = document.getElementById('private-key').value;
+            
+            const res = await fetch(`${API}/send?from=${currentUser}&key=${key}&to=${to}&amount=${amount}`);
+            const data = await res.json();
+            
+            if (data.status === "Success") {
+                alert("🚀 تم إرسال العملات بنجاح!");
+                closeModal();
+                updateUI();
+            } else { alert("❌ خطأ: " + data.error); }
+        }
+
+        function openModal(id) { document.getElementById(id).style.display = 'block'; }
+        function closeModal() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
+        function logout() { localStorage.removeItem('rtc_user_addr'); currentUser = null; updateUI(); }
+
+        updateUI();
+        setInterval(updateUI, 10000); // تحديث تلقائي كل 10 ثوانٍ
     </script>
 </body>
 </html>
