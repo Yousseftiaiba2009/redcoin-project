@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redcoin RTC | Official Node</title>
+    <title>Redcoin RTC | Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --red: #ff0000;
-            --bg-dark: #0b0e11; /* لون خلفية باينانس الرسمي */
-            --card-bg: #1e2329; /* لون البطاقات في باينانس */
+            --bg-dark: #0b0e11;
+            --card-bg: #1e2329;
             --text-gray: #848e9c;
             --text-white: #eaecef;
         }
@@ -20,7 +20,7 @@
             font-family: 'Inter', sans-serif;
             margin: 0;
             padding: 0;
-            overflow-x: hidden;
+            transition: all 0.3s ease;
         }
 
         /* Header */
@@ -36,7 +36,7 @@
         .logo-section { display: flex; align-items: center; gap: 10px; }
         .logo-r { background: var(--red); color: black; padding: 5px 10px; border-radius: 4px; font-weight: bold; }
 
-        /* Main Asset Card */
+        /* Main Card */
         .asset-card {
             background: var(--card-bg);
             margin: 20px;
@@ -49,7 +49,7 @@
         .balance-main { font-size: 32px; font-weight: 700; margin: 5px 0; }
         .balance-sub { font-size: 14px; color: var(--text-gray); }
 
-        /* Action Buttons Grid */
+        /* Quick Actions */
         .actions-container {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -64,10 +64,7 @@
             align-items: center;
             gap: 8px;
             cursor: pointer;
-            transition: 0.2s;
         }
-
-        .action-item:hover .icon-box { background: rgba(255, 0, 0, 0.2); }
 
         .icon-box {
             width: 50px;
@@ -77,18 +74,21 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            fill: var(--red); /* لتلوين أيقونات SVG باللون الأحمر */
+            fill: var(--red);
+            transition: 0.3s;
         }
 
-        .action-label { font-size: 12px; color: var(--text-white); font-weight: 500; }
+        .action-item:hover .icon-box { background: rgba(255, 0, 0, 0.2); transform: translateY(-3px); }
+        .action-label { font-size: 11px; font-weight: 500; }
 
-        /* Network Stats Section (مثل قائمة العملات) */
+        /* Network Stats */
         .network-section { padding: 0 20px; }
         .stat-row {
             display: flex;
             justify-content: space-between;
-            padding: 15px 0;
+            padding: 12px 0;
             border-bottom: 1px solid #2b3139;
+            font-size: 14px;
         }
 
         /* Modal Settings */
@@ -97,17 +97,22 @@
             background:rgba(0,0,0,0.9); backdrop-filter: blur(8px);
         }
         .modal-content {
-            background: var(--card-bg); margin: 15% auto; padding: 25px; width: 85%; max-width: 350px; 
+            background: var(--card-bg); margin: 10% auto; padding: 25px; width: 85%; max-width: 350px; 
             border-radius: 20px; border: 1px solid #333;
         }
 
+        .setting-group { margin-bottom: 20px; background: #0b0e11; padding: 12px; border-radius: 12px; }
+        .setting-label { font-size: 10px; color: var(--text-gray); display: block; margin-bottom: 10px; text-transform: uppercase; }
+
+        select, input[type="range"] { width: 100%; background: none; border: 1px solid #333; color: white; padding: 8px; border-radius: 6px; }
+        
         .btn-save {
             background: var(--red); color: white; border: none; width: 100%; padding: 12px; 
-            border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 20px;
+            border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px;
         }
     </style>
 </head>
-<body>
+<body id="mainBody">
 
     <div class="header">
         <div class="logo-section">
@@ -115,159 +120,126 @@
             <span style="font-weight: 600; font-size: 14px;">Redcoin <span style="color: var(--red);">RTC</span></span>
         </div>
         <div onclick="openSettings()" style="cursor: pointer;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#848e9c" stroke-width="2"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#848e9c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         </div>
     </div>
 
     <div class="asset-card">
-        <div class="balance-label">Estimated Balance</div>
+        <div class="balance-label" id="txt-balance-label">Estimated Balance</div>
         <div class="balance-main" id="db-balance">500,000.00 RTC</div>
         <div class="balance-sub">≈ $25,142.50 <span style="color: #0ecb81; font-size: 12px;">+2.45%</span></div>
     </div>
 
     <div class="actions-container">
-        <div class="action-item" onclick="alert('Starting Miner...')">
-            <div class="icon-box">
-                <svg width="24" height="24" viewBox="0 0 24 24"><path d="M21.71 20.29l-1.42-1.42a.996.996 0 10-1.41 1.41l1.42 1.42c.39.39 1.02.39 1.41 0a.99.99 0 000-1.41zM7 11c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm10-4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM15 11c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/></svg>
-            </div>
-            <span class="action-label">Mining</span>
+        <div class="action-item" onclick="alert('Mining Started')">
+            <div class="icon-box"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M21.71 20.29l-1.42-1.42a.996.996 0 10-1.41 1.41l1.42 1.42c.39.39 1.02.39 1.41 0a.99.99 0 000-1.41zM7 11c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/></svg></div>
+            <span class="action-label" id="txt-mine">Mining</span>
         </div>
         <div class="action-item">
-            <div class="icon-box">
-                <svg width="24" height="24" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-            </div>
-            <span class="action-label">Send</span>
+            <div class="icon-box"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></div>
+            <span class="action-label" id="txt-send">Send</span>
         </div>
         <div class="action-item">
-            <div class="icon-box">
-                <svg width="24" height="24" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-            </div>
-            <span class="action-label">Deposit</span>
+            <div class="icon-box"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></div>
+            <span class="action-label" id="txt-deposit">Deposit</span>
         </div>
         <div class="action-item" onclick="window.location.href='index.html'">
-            <div class="icon-box">
-                <svg width="24" height="24" viewBox="0 0 24 24"><path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42A6.92 6.92 0 0119 12c0 3.87-3.13 7-7 7s-7-3.13-7-7a6.92 6.92 0 012.59-5.41L6.17 5.17A8.95 8.95 0 003 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-3.04-1.51-5.73-3.83-7.33z"/></svg>
-            </div>
-            <span class="action-label">Logout</span>
+            <div class="icon-box"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42A6.92 6.92 0 0119 12c0 3.87-3.13 7-7 7s-7-3.13-7-7a6.92 6.92 0 012.59-5.41L6.17 5.17A8.95 8.95 0 003 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-3.04-1.51-5.73-3.83-7.33z"/></svg></div>
+            <span class="action-label" id="txt-logout">Logout</span>
         </div>
     </div>
 
     <div class="network-section">
-        <h3 style="font-size: 16px; margin-bottom: 10px;">Network Info</h3>
+        <h3 id="txt-net-info" style="font-size: 15px; margin-bottom: 15px; color: var(--text-gray);">Network Info</h3>
         <div class="stat-row">
-            <span style="color: var(--text-gray);">Network Status</span>
+            <span id="txt-net-status">Network Status</span>
             <span style="color: #0ecb81; font-weight: 600;">Optimal</span>
         </div>
         <div class="stat-row">
-            <span style="color: var(--text-gray);">Hashrate</span>
+            <span>Hashrate</span>
             <span id="hash-rate">0.00 H/s</span>
-        </div>
-        <div class="stat-row">
-            <span style="color: var(--text-gray);">Active Nodes</span>
-            <span>1 Official Node</span>
         </div>
     </div>
 
     <div id="settingsModal" class="modal">
         <div class="modal-content">
-            <h3 style="color: var(--red); margin-top: 0;">Configuration</h3>
-            <label style="font-size: 12px; color: var(--text-gray);">CPU POWER ALLOCATION</label>
-            <input type="range" id="cpuRange" min="10" max="100" value="50" style="width: 100%; accent-color: var(--red); margin: 15px 0;">
+            <h2 id="txt-config-title" style="color: var(--red); font-size: 18px; margin-top:0">Settings</h2>
             
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
-                <span style="font-size: 14px;">Privacy Mode</span>
-                <input type="checkbox" checked>
+            <div class="setting-group">
+                <label class="setting-label">⛏️ Performance (CPU Threads)</label>
+                <input type="range" id="cpuRange" min="1" max="8" value="2" oninput="document.getElementById('cpuVal').innerText = this.value">
+                <div style="text-align:right; font-size:12px; margin-top:5px">Threads: <span id="cpuVal" style="color:var(--red)">2</span></div>
             </div>
-            <button class="btn-save" onclick="closeSettings()">Save Configuration</button>
+
+            <div class="setting-group">
+                <label class="setting-label">🛡️ Security</label>
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px">
+                    <span>Privacy Mode</span>
+                    <input type="checkbox" id="privacyMode" onchange="togglePrivacy()">
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <label class="setting-label">🌐 Language / اللغة</label>
+                <select id="langSelect" onchange="updateLanguage(this.value)">
+                    <option value="en">English (US)</option>
+                    <option value="ar">العربية (Arabic)</option>
+                </select>
+            </div>
+
+            <button class="btn-save" onclick="closeSettings()">Apply Changes</button>
         </div>
     </div>
 
     <script>
         function openSettings() { document.getElementById('settingsModal').style.display = 'block'; }
         function closeSettings() { document.getElementById('settingsModal').style.display = 'none'; }
-        
+
+        // نظام إخفاء الرصيد
+        let realBalance = "500,000.00 RTC";
+        function togglePrivacy() {
+            const isPrivate = document.getElementById('privacyMode').checked;
+            document.getElementById('db-balance').innerText = isPrivate ? "******** RTC" : realBalance;
+        }
+
+        // نظام اللغات
+        const langData = {
+            en: {
+                balanceLabel: "Estimated Balance", mine: "Mining", send: "Send", 
+                deposit: "Deposit", logout: "Logout", netInfo: "Network Info", 
+                netStatus: "Network Status", config: "Settings", dir: "ltr"
+            },
+            ar: {
+                balanceLabel: "الرصيد التقديري", mine: "تعدين", send: "إرسال", 
+                deposit: "إيداع", logout: "خروج", netInfo: "معلومات الشبكة", 
+                netStatus: "حالة الشبكة", config: "الإعدادات", dir: "rtl"
+            }
+        };
+
+        function updateLanguage(lang) {
+            const d = langData[lang];
+            document.getElementById('txt-balance-label').innerText = d.balanceLabel;
+            document.getElementById('txt-mine').innerText = d.mine;
+            document.getElementById('txt-send').innerText = d.send;
+            document.getElementById('txt-deposit').innerText = d.deposit;
+            document.getElementById('txt-logout').innerText = d.logout;
+            document.getElementById('txt-net-info').innerText = d.netInfo;
+            document.getElementById('txt-net-status').innerText = d.netStatus;
+            document.getElementById('txt-config-title').innerText = d.config;
+            document.getElementById('mainBody').style.direction = d.dir;
+        }
+
         async function loadData() {
             try {
                 const res = await fetch('https://rtc-miner-server.onrender.com/');
                 const data = await res.json();
-                if(data.balance) document.getElementById('db-balance').innerText = data.balance + " RTC";
-            } catch(e) { console.log("Live node connection pending..."); }
+                if(data.balance) {
+                    realBalance = data.balance + " RTC";
+                    togglePrivacy(); 
+                }
+            } catch(e) { console.log("Connecting to node..."); }
         }
         loadData();
     </script>
 </body>
 </html>
-<div id="settingsModal" class="modal">
-    <div class="modal-content">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2 style="color: var(--red); margin: 0; font-size: 18px;">Configuration Center</h2>
-            <span onclick="closeSettings()" style="cursor:pointer; color:var(--text-gray); font-size: 20px;">&times;</span>
-        </div>
-
-        <div style="margin-bottom: 25px;">
-            <label style="font-size: 11px; color: var(--text-gray); letter-spacing: 1px;">⛏️ PERFORMANCE CONTROL</label>
-            <div style="background: #0b0e11; padding: 15px; border-radius: 12px; margin-top: 10px;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                    <span style="font-size: 13px;">CPU Threads</span>
-                    <span id="threadsVal" style="color: var(--red);">2</span>
-                </div>
-                <input type="range" id="cpuRange" min="1" max="8" value="2" oninput="document.getElementById('threadsVal').innerText = this.value" style="width: 100%; accent-color: var(--red);">
-                <p style="font-size: 10px; color: #555; margin-top: 8px;">Higher threads = Faster mining, more heat.</p>
-            </div>
-        </div>
-
-        <div style="margin-bottom: 25px;">
-            <label style="font-size: 11px; color: var(--text-gray); letter-spacing: 1px;">🛡️ SECURITY & PRIVACY</label>
-            <div style="background: #0b0e11; padding: 5px 15px; border-radius: 12px; margin-top: 10px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #1e2329;">
-                    <span style="font-size: 13px;">Hide Balance (Stealth)</span>
-                    <input type="checkbox" id="stealthMode" onchange="toggleStealth()">
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0;">
-                    <span style="font-size: 13px;">2FA Authentication</span>
-                    <button style="background: #2b3139; color: var(--text-white); border: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; cursor: pointer;">Enable</button>
-                </div>
-            </div>
-        </div>
-
-        <div>
-            <label style="font-size: 11px; color: var(--text-gray); letter-spacing: 1px;">🎨 APPEARANCE</label>
-            <div style="background: #0b0e11; padding: 15px; border-radius: 12px; margin-top: 10px;">
-                <select id="themeSelect" onchange="changeTheme(this.value)" style="width: 100%; background: none; border: 1px solid #333; color: white; padding: 8px; border-radius: 6px; outline: none;">
-                    <option value="red">Cyber Red (Default)</option>
-                    <option value="blue">Deep Ocean Blue</option>
-                    <option value="gold">Luxury Gold</option>
-                </select>
-            </div>
-        </div>
-
-        <button class="btn-save" onclick="saveAndClose()">Apply & Save Changes</button>
-    </div>
-</div>
-
-<script>
-    // خاصية إخفاء الرصيد (Privacy Mode)
-    let originalBalance = "500,000.00 RTC";
-    function toggleStealth() {
-        const balanceElement = document.getElementById('db-balance');
-        if(document.getElementById('stealthMode').checked) {
-            balanceElement.innerText = "******** RTC";
-        } else {
-            balanceElement.innerText = originalBalance;
-        }
-    }
-
-    // تغيير الثيم فورياً
-    function changeTheme(color) {
-        if(color === 'blue') document.documentElement.style.setProperty('--red', '#007bff');
-        else if(color === 'gold') document.documentElement.style.setProperty('--red', '#f0b90b');
-        else document.documentElement.style.setProperty('--red', '#ff0000');
-    }
-
-    function saveAndClose() {
-        const threads = document.getElementById('cpuRange').value;
-        // هنا سيتم إرسال الإعدادات للسيرفر مستقبلاً
-        alert(`Configuration Applied:\n- Threads: ${threads}\n- Stealth: ${document.getElementById('stealthMode').checked}`);
-        closeSettings();
-    }
-</script>
