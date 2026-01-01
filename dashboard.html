@@ -3,38 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redcoin RTC | Dashboard Pro</title>
+    <title>Redcoin RTC | Pro Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root { --red: #ff0000; --bg-dark: #0b0e11; --card-bg: #1e2329; --text-gray: #848e9c; --text-white: #eaecef; }
-        body { background-color: var(--bg-dark); color: var(--text-white); font-family: 'Inter', sans-serif; margin: 0; padding: 0; transition: 0.3s; }
+        body { background-color: var(--bg-dark); color: var(--text-white); font-family: 'Inter', sans-serif; margin: 0; padding: 0; transition: 0.3s; overflow-x: hidden; }
         
         /* Header */
         .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--bg-dark); border-bottom: 1px solid #2b3139; }
-        .logo-section { display: flex; align-items: center; gap: 10px; }
         .logo-r { background: var(--red); color: black; padding: 5px 10px; border-radius: 4px; font-weight: bold; }
 
-        /* Main Asset Card */
-        .asset-card { background: var(--card-bg); margin: 20px; padding: 25px; border-radius: 16px; border-bottom: 3px solid var(--red); position: relative; }
+        /* Balance Card */
+        .asset-card { background: var(--card-bg); margin: 20px; padding: 25px; border-radius: 16px; border-bottom: 3px solid var(--red); }
         .balance-label { font-size: 13px; color: var(--text-gray); margin-bottom: 8px; }
-        .balance-main { font-size: 32px; font-weight: 700; margin: 5px 0; }
-        .balance-sub { font-size: 14px; color: var(--text-gray); }
-
-        /* Actions Grid */
+        .balance-main { font-size: 32px; font-weight: 700; margin: 5px 0; color: var(--text-white); }
+        
+        /* Actions */
         .actions-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 0 20px; margin-bottom: 30px; }
         .action-item { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
         .icon-box { width: 50px; height: 50px; background: #2b3139; border-radius: 50%; display: flex; align-items: center; justify-content: center; fill: var(--red); transition: 0.3s; }
         .action-item:hover .icon-box { background: rgba(255, 0, 0, 0.2); transform: translateY(-3px); }
         .action-label { font-size: 11px; font-weight: 500; }
 
-        /* Modal Styles */
+        /* Modals */
         .modal { display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.9); backdrop-filter: blur(8px); }
-        .modal-content { background: var(--card-bg); margin: 10% auto; padding: 25px; width: 85%; max-width: 350px; border-radius: 20px; border: 1px solid #333; }
-        .setting-group { margin-bottom: 20px; background: #0b0e11; padding: 12px; border-radius: 12px; }
-        .setting-label { font-size: 10px; color: var(--text-gray); display: block; margin-bottom: 10px; text-transform: uppercase; }
-        
-        input[type="text"], input[type="number"], select { width: 100%; background: #0b0e11; border: 1px solid #333; color: white; padding: 12px; border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; }
-        .btn-action { background: var(--red); color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .modal-content { background: var(--card-bg); margin: 15% auto; padding: 25px; width: 85%; max-width: 350px; border-radius: 20px; border: 1px solid #333; }
+        input, select { width: 100%; background: #0b0e11; border: 1px solid #333; color: white; padding: 12px; border-radius: 8px; margin-bottom: 15px; box-sizing: border-box; }
+        .btn-action { background: var(--red); color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
         
         .stat-row { display: flex; justify-content: space-between; padding: 12px 20px; border-bottom: 1px solid #2b3139; font-size: 14px; }
     </style>
@@ -42,24 +37,24 @@
 <body id="mainBody">
 
     <div class="header">
-        <div class="logo-section">
+        <div style="display:flex; align-items:center; gap:10px;">
             <span class="logo-r">R</span>
-            <span style="font-weight: 600; font-size: 14px;">Redcoin <span style="color: var(--red);">RTC</span></span>
+            <span style="font-weight:600;">Redcoin <span style="color:var(--red)">RTC</span></span>
         </div>
-        <div onclick="openModal('settingsModal')" style="cursor: pointer;">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#848e9c" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        <div onclick="openModal('settingsModal')" style="cursor:pointer;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#848e9c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
         </div>
     </div>
 
     <div class="asset-card">
-        <div class="balance-label" id="txt-balance-label">Estimated Balance</div>
-        <div class="balance-main" id="db-balance">500,000.00 RTC</div>
-        <div class="balance-sub">≈ $25,142.50 <span style="color: #0ecb81; font-size: 12px;">+2.45%</span></div>
+        <div class="balance-label" id="txt-bal-label">Estimated Balance</div>
+        <div class="balance-main" id="db-balance">500,000.0000 RTC</div>
+        <div class="balance-sub">≈ $<span id="usd-val">25,142.50</span> <span style="color:#0ecb81;">+2.45%</span></div>
     </div>
 
     <div class="actions-container">
-        <div class="action-item" onclick="alert('Miner starting on ' + document.getElementById('cpuRange').value + ' threads')">
-            <div class="icon-box"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M21.71 20.29l-1.42-1.42a.996.996 0 10-1.41 1.41l1.42 1.42c.39.39 1.02.39 1.41 0a.99.99 0 000-1.41zM7 11c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/></svg></div>
+        <div class="action-item" onclick="startMining()">
+            <div class="icon-box" id="mineIcon"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M21.71 20.29l-1.42-1.42a.996.996 0 10-1.41 1.41l1.42 1.42c.39.39 1.02.39 1.41 0a.99.99 0 000-1.41zM7 11c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/></svg></div>
             <span class="action-label" id="txt-mine">Mining</span>
         </div>
         <div class="action-item" onclick="openModal('sendModal')">
@@ -70,86 +65,89 @@
             <div class="icon-box"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></div>
             <span class="action-label" id="txt-deposit">Deposit</span>
         </div>
-        <div class="action-item" onclick="window.location.href='index.html'">
-            <div class="icon-box"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42A6.92 6.92 0 0119 12c0 3.87-3.13 7-7 7s-7-3.13-7-7a6.92 6.92 0 012.59-5.41L6.17 5.17A8.95 8.95 0 003 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-3.04-1.51-5.73-3.83-7.33z"/></svg></div>
+        <div class="action-item" onclick="location.href='index.html'">
+            <div class="icon-box"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></div>
             <span class="action-label" id="txt-logout">Logout</span>
         </div>
     </div>
 
-    <h3 id="txt-net-info" style="font-size: 15px; margin: 0 20px 10px; color: var(--text-gray);">Network Info</h3>
-    <div class="stat-row"><span>Status</span><span style="color: #0ecb81;">Online</span></div>
+    <h3 id="txt-net" style="margin:0 20px 10px; font-size:14px; color:var(--text-gray);">NETWORK STATUS</h3>
     <div class="stat-row"><span>Hashrate</span><span id="hash-rate">0.00 H/s</span></div>
+    <div class="stat-row"><span>Status</span><span style="color:#0ecb81;">Connected</span></div>
 
-    <div id="sendModal" class="modal">
-        <div class="modal-content">
-            <h2 id="txt-send-title" style="color:var(--red); margin-top:0">Send RTC</h2>
-            <input type="text" id="sendAddr" placeholder="Recipient RTC Address">
-            <input type="number" id="sendAmount" placeholder="Amount">
-            <button class="btn-action" onclick="processSend()">Confirm Transfer</button>
-            <button class="btn-action" style="background:#333; margin-top:5px" onclick="closeModal('sendModal')">Cancel</button>
-        </div>
-    </div>
+    <div id="sendModal" class="modal"><div class="modal-content">
+        <h2 id="txt-send-h">Send RTC</h2>
+        <input type="text" placeholder="RTC Address">
+        <input type="number" placeholder="Amount">
+        <button class="btn-action" onclick="alert('Transaction Broadcasted!'); closeModal('sendModal')">Confirm</button>
+        <button class="btn-action" style="background:#333; margin-top:10px" onclick="closeModal('sendModal')">Cancel</button>
+    </div></div>
 
-    <div id="depositModal" class="modal">
-        <div class="modal-content" style="text-align:center">
-            <h2 id="txt-dep-title" style="color:var(--red); margin-top:0">Your Address</h2>
-            <div style="background:#0b0e11; padding:15px; border-radius:10px; word-break:break-all; font-size:12px; border:1px dashed var(--red)">
-                RTC_Master_Admin_2026_Secure_Node
-            </div>
-            <button class="btn-action" onclick="copyAddr()">Copy Address</button>
-            <button class="btn-action" style="background:#333; margin-top:5px" onclick="closeModal('depositModal')">Close</button>
-        </div>
-    </div>
+    <div id="depositModal" class="modal"><div class="modal-content" style="text-align:center">
+        <h2 id="txt-dep-h">Receive</h2>
+        <div style="background:#0b0e11; padding:15px; border-radius:10px; font-size:11px; border:1px dashed var(--red); margin-bottom:15px;">RTC_Admin_Master_Secure_Node_2026</div>
+        <button class="btn-action" onclick="navigator.clipboard.writeText('RTC_Admin_Master_Secure_Node_2026'); alert('Copied!')">Copy Address</button>
+        <button class="btn-action" style="background:#333; margin-top:10px" onclick="closeModal('depositModal')">Close</button>
+    </div></div>
 
-    <div id="settingsModal" class="modal">
-        <div class="modal-content">
-            <h2 id="txt-config-title" style="color:var(--red); margin-top:0">Settings</h2>
-            <div class="setting-group">
-                <label class="setting-label">Mining Power</label>
-                <input type="range" id="cpuRange" min="1" max="8" value="2" oninput="document.getElementById('cpuVal').innerText = this.value">
-                <div style="text-align:right; font-size:12px">Threads: <span id="cpuVal" style="color:var(--red)">2</span></div>
-            </div>
-            <div class="setting-group">
-                <label class="setting-label">Language / اللغة</label>
-                <select onchange="updateLanguage(this.value)">
-                    <option value="en">English</option>
-                    <option value="ar">العربية</option>
-                </select>
-            </div>
-            <button class="btn-action" onclick="closeModal('settingsModal')">Save</button>
-        </div>
-    </div>
+    <div id="settingsModal" class="modal"><div class="modal-content">
+        <h2 id="txt-set-h">Settings</h2>
+        <label style="font-size:11px; color:var(--text-gray)">LANGUAGE / اللغة</label>
+        <select onchange="changeLang(this.value)">
+            <option value="en">English</option>
+            <option value="ar">العربية</option>
+        </select>
+        <label style="font-size:11px; color:var(--text-gray)">CPU THREADS</label>
+        <input type="range" min="1" max="8" value="2">
+        <button class="btn-action" onclick="closeModal('settingsModal')">Save</button>
+    </div></div>
 
     <script>
-        function openModal(id) { document.getElementById(id).style.display = 'block'; }
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        // --- المنطق المالي (الرصيد الحي) ---
+        let balance = parseFloat(localStorage.getItem('rtc_bal')) || 500000.00;
+        let isMining = false;
 
-        function copyAddr() {
-            navigator.clipboard.writeText("RTC_Master_Admin_2026_Secure_Node");
-            alert("Address Copied!");
+        function updateUI() {
+            document.getElementById('db-balance').innerText = balance.toLocaleString(undefined, {minimumFractionDigits: 4}) + " RTC";
+            document.getElementById('usd-val').innerText = (balance * 0.05).toLocaleString(); // سعر افتراضي 0.05$
+            localStorage.setItem('rtc_bal', balance);
         }
 
-        function processSend() {
-            const a = document.getElementById('sendAmount').value;
-            if(a > 0) { alert("Transaction of " + a + " RTC is broadcasting..."); closeModal('sendModal'); }
+        function startMining() {
+            if(isMining) return;
+            isMining = true;
+            document.getElementById('txt-mine').innerText = "Mining...";
+            document.getElementById('mineIcon').style.fill = "#0ecb81";
+            
+            setInterval(() => {
+                balance += 0.000125; // مقدار الربح في الثانية
+                document.getElementById('hash-rate').innerText = (Math.random() * 20 + 15).toFixed(2) + " H/s";
+                updateUI();
+            }, 1000);
         }
 
-        const langData = {
-            en: { bal: "Estimated Balance", mine: "Mining", send: "Send", dep: "Deposit", out: "Logout", net: "Network Info", cfg: "Settings", dir: "ltr" },
-            ar: { bal: "الرصيد التقديري", mine: "تعدين", send: "إرسال", dep: "إيداع", out: "خروج", net: "معلومات الشبكة", cfg: "الإعدادات", dir: "rtl" }
+        // --- نظام اللغات والواجهة ---
+        const langMap = {
+            en: { bal: "Estimated Balance", mine: "Mining", send: "Send", dep: "Deposit", out: "Logout", net: "NETWORK STATUS", set: "Settings", dir: "ltr" },
+            ar: { bal: "الرصيد التقديري", mine: "تعدين", send: "إرسال", dep: "إيداع", out: "خروج", net: "حالة الشبكة", set: "الإعدادات", dir: "rtl" }
         };
 
-        function updateLanguage(l) {
-            const d = langData[l];
-            document.getElementById('txt-balance-label').innerText = d.bal;
+        function changeLang(l) {
+            const d = langMap[l];
+            document.getElementById('txt-bal-label').innerText = d.bal;
             document.getElementById('txt-mine').innerText = d.mine;
             document.getElementById('txt-send').innerText = d.send;
             document.getElementById('txt-deposit').innerText = d.dep;
             document.getElementById('txt-logout').innerText = d.out;
-            document.getElementById('txt-net-info').innerText = d.net;
-            document.getElementById('txt-config-title').innerText = d.cfg;
-            document.getElementById('mainBody').style.direction = d.dir;
+            document.getElementById('txt-net').innerText = d.net;
+            document.getElementById('txt-set-h').innerText = d.set;
+            document.body.style.direction = d.dir;
         }
+
+        function openModal(id) { document.getElementById(id).style.display = 'block'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        
+        updateUI(); // تشغيل عند البدء
     </script>
 </body>
 </html>
