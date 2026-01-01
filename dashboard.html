@@ -197,3 +197,77 @@
     </script>
 </body>
 </html>
+<div id="settingsModal" class="modal">
+    <div class="modal-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="color: var(--red); margin: 0; font-size: 18px;">Configuration Center</h2>
+            <span onclick="closeSettings()" style="cursor:pointer; color:var(--text-gray); font-size: 20px;">&times;</span>
+        </div>
+
+        <div style="margin-bottom: 25px;">
+            <label style="font-size: 11px; color: var(--text-gray); letter-spacing: 1px;">⛏️ PERFORMANCE CONTROL</label>
+            <div style="background: #0b0e11; padding: 15px; border-radius: 12px; margin-top: 10px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span style="font-size: 13px;">CPU Threads</span>
+                    <span id="threadsVal" style="color: var(--red);">2</span>
+                </div>
+                <input type="range" id="cpuRange" min="1" max="8" value="2" oninput="document.getElementById('threadsVal').innerText = this.value" style="width: 100%; accent-color: var(--red);">
+                <p style="font-size: 10px; color: #555; margin-top: 8px;">Higher threads = Faster mining, more heat.</p>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 25px;">
+            <label style="font-size: 11px; color: var(--text-gray); letter-spacing: 1px;">🛡️ SECURITY & PRIVACY</label>
+            <div style="background: #0b0e11; padding: 5px 15px; border-radius: 12px; margin-top: 10px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #1e2329;">
+                    <span style="font-size: 13px;">Hide Balance (Stealth)</span>
+                    <input type="checkbox" id="stealthMode" onchange="toggleStealth()">
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0;">
+                    <span style="font-size: 13px;">2FA Authentication</span>
+                    <button style="background: #2b3139; color: var(--text-white); border: none; padding: 4px 10px; border-radius: 4px; font-size: 11px; cursor: pointer;">Enable</button>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <label style="font-size: 11px; color: var(--text-gray); letter-spacing: 1px;">🎨 APPEARANCE</label>
+            <div style="background: #0b0e11; padding: 15px; border-radius: 12px; margin-top: 10px;">
+                <select id="themeSelect" onchange="changeTheme(this.value)" style="width: 100%; background: none; border: 1px solid #333; color: white; padding: 8px; border-radius: 6px; outline: none;">
+                    <option value="red">Cyber Red (Default)</option>
+                    <option value="blue">Deep Ocean Blue</option>
+                    <option value="gold">Luxury Gold</option>
+                </select>
+            </div>
+        </div>
+
+        <button class="btn-save" onclick="saveAndClose()">Apply & Save Changes</button>
+    </div>
+</div>
+
+<script>
+    // خاصية إخفاء الرصيد (Privacy Mode)
+    let originalBalance = "500,000.00 RTC";
+    function toggleStealth() {
+        const balanceElement = document.getElementById('db-balance');
+        if(document.getElementById('stealthMode').checked) {
+            balanceElement.innerText = "******** RTC";
+        } else {
+            balanceElement.innerText = originalBalance;
+        }
+    }
+
+    // تغيير الثيم فورياً
+    function changeTheme(color) {
+        if(color === 'blue') document.documentElement.style.setProperty('--red', '#007bff');
+        else if(color === 'gold') document.documentElement.style.setProperty('--red', '#f0b90b');
+        else document.documentElement.style.setProperty('--red', '#ff0000');
+    }
+
+    function saveAndClose() {
+        const threads = document.getElementById('cpuRange').value;
+        // هنا سيتم إرسال الإعدادات للسيرفر مستقبلاً
+        alert(`Configuration Applied:\n- Threads: ${threads}\n- Stealth: ${document.getElementById('stealthMode').checked}`);
+        closeSettings();
+    }
+</script>
