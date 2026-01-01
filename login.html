@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wallet Login | Redcoin RTC</title>
+    <title>Wallet Access | Redcoin RTC</title>
     <style>
         :root {
             --red-main: #e63946;
@@ -33,7 +33,6 @@
             box-shadow: 0 10px 40px rgba(0,0,0,0.7);
         }
 
-        .logo-area { margin-bottom: 25px; }
         .logo-symbol {
             background: var(--red-main);
             padding: 10px 15px;
@@ -42,36 +41,36 @@
             font-size: 24px;
         }
 
-        h2 { margin: 15px 0; color: white; font-size: 22px; }
-        p { color: #888; font-size: 14px; margin-bottom: 25px; }
+        h2 { margin: 20px 0 5px; color: white; }
+        p { color: #888; font-size: 14px; margin-bottom: 20px; }
 
-        .input-group {
-            text-align: left;
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            font-size: 12px;
-            color: var(--red-main);
-            margin-bottom: 5px;
-            text-transform: uppercase;
-            font-weight: bold;
-        }
+        .input-group { text-align: left; margin-bottom: 15px; }
+        label { display: block; font-size: 11px; color: var(--red-main); margin-bottom: 5px; font-weight: bold; }
 
         input {
             width: 100%;
             padding: 12px;
-            background: #0f0f12;
+            background: #000;
             border: 1px solid #333;
             border-radius: 8px;
-            color: #00ff00; /* لون أخضر ليوحي بالبرمجة والمفاتيح */
+            color: #00ff00;
             font-family: 'Courier New', monospace;
             box-sizing: border-box;
-            font-size: 13px;
+            font-size: 12px;
         }
 
-        input:focus { border-color: var(--red-main); outline: none; }
+        .btn-demo {
+            background: transparent;
+            color: #555;
+            border: 1px dashed #444;
+            padding: 8px;
+            font-size: 11px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+        .btn-demo:hover { color: var(--red-main); border-color: var(--red-main); }
 
         .btn-submit {
             width: 100%;
@@ -82,55 +81,62 @@
             color: white;
             font-weight: bold;
             cursor: pointer;
-            margin-top: 10px;
             transition: 0.3s;
-            letter-spacing: 1px;
         }
 
-        .btn-submit:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(230, 57, 70, 0.3); }
-
-        .footer-links { margin-top: 25px; font-size: 13px; color: #666; }
-        .footer-links a { color: var(--red-main); text-decoration: none; }
-        
-        .warning-text {
-            font-size: 11px;
-            color: #555;
-            margin-top: 15px;
-            line-height: 1.4;
-        }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(230, 57, 70, 0.4); }
     </style>
 </head>
 <body>
 
     <div class="login-box">
-        <div class="logo-area">
-            <span class="logo-symbol">R</span>
-        </div>
-        <h2>Access Master Wallet</h2>
-        <p>Enter your cryptographic credentials</p>
+        <div class="logo-area"><span class="logo-symbol">R</span></div>
+        <h2>Wallet Access</h2>
+        <p>Master Control Panel</p>
+
+        <button class="btn-demo" onclick="fillDemoKeys()">⚡ Click to get my Master Keys</button>
         
-        <form onsubmit="event.preventDefault(); alert('Authenticating with RTC Node...')">
+        <form onsubmit="handleLogin(event)">
             <div class="input-group">
-                <label>Wallet Address (Public)</label>
-                <input type="text" placeholder="e.g. RTC_7x9v...2wQ" required>
+                <label>MASTER WALLET ADDRESS</label>
+                <input type="text" id="wallet-addr" placeholder="Enter RTC Address" required>
             </div>
             
             <div class="input-group">
-                <label>Private Spend Key</label>
-                <input type="password" placeholder="••••••••••••••••••••••••••••••••" required>
+                <label>PRIVATE SPEND KEY</label>
+                <input type="password" id="wallet-key" placeholder="Enter Secret Key" required>
             </div>
             
-            <button type="submit" class="btn-submit">UNLOCK WALLET</button>
+            <button type="submit" class="btn-submit">UNLOCK & ENTER</button>
         </form>
 
-        <div class="warning-text">
-            Never share your Private Key with anyone. Redcoin staff will never ask for it.
-        </div>
-
-        <div class="footer-links">
-            New to Redcoin? <a href="register.html">Create New Wallet</a>
+        <div style="margin-top: 20px; font-size: 12px;">
+            <a href="index.html" style="color: #666; text-decoration: none;">← Back to Home</a>
         </div>
     </div>
 
+    <script>
+        // بياناتك الحقيقية للتجربة
+        const masterAddress = "RTC_Master_500k_Admin_User";
+        const masterKey = "SK_REDCOIN_ADMIN_99_PRO_SECURE";
+
+        function fillDemoKeys() {
+            document.getElementById('wallet-addr').value = masterAddress;
+            document.getElementById('wallet-key').value = masterKey;
+            console.log("Keys loaded for testing.");
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const addr = document.getElementById('wallet-addr').value;
+            
+            if(addr === masterAddress) {
+                alert("Success! Accessing Redcoin Core Node...");
+                window.location.href = 'index.html'; // سيعيدك للصفحة الرئيسية كأنك سجلت دخول
+            } else {
+                alert("Invalid Keys. Please try again.");
+            }
+        }
+    </script>
 </body>
 </html>
