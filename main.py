@@ -17,7 +17,7 @@ LOG_FILE = "blockchain_log.json"
 # --- إعدادات المؤسس (قمت بتسريعها هنا) ---
 START_BALANCE = 500000.0
 # سرعة التعدين: 0.00125 تعني زيادة ملحوظة في كل ثانية
-MINING_SPEED = 0.01 
+MINING_SPEED = 0.1 
 FOUNDER_KEY = "RTC_ADMIN_2025_SECURE"
 
 # --- وظائف إدارة البيانات ---
