@@ -9,37 +9,24 @@
         :root { --red: #ff0000; --bg-dark: #0b0e11; --card-bg: #1e2329; --text-gray: #848e9c; --text-white: #eaecef; }
         body { background-color: var(--bg-dark); color: var(--text-white); font-family: 'Inter', sans-serif; margin: 0; padding: 0; transition: 0.3s; overflow-x: hidden; }
         
-        /* --- كود تعريف المستخدم الجديد --- */
-        .user-profile-bar {
-            display: flex; align-items: center; gap: 12px; padding: 15px 20px;
-            background: rgba(255,0,0,0.05); border-bottom: 1px solid #2b3139;
-        }
-        .avatar {
-            background: var(--red); color: black; width: 40px; height: 40px; 
-            border-radius: 50%; display: flex; justify-content: center; 
-            align-items: center; font-weight: 800; font-family: 'Orbitron';
-            box-shadow: 0 0 10px rgba(255,0,0,0.3);
-        }
+        .user-profile-bar { display: flex; align-items: center; gap: 12px; padding: 15px 20px; background: rgba(255,0,0,0.05); border-bottom: 1px solid #2b3139; }
+        .avatar { background: var(--red); color: black; width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: 800; font-family: 'Orbitron'; box-shadow: 0 0 10px rgba(255,0,0,0.3); }
         .user-details div:first-child { font-weight: bold; font-size: 15px; color: white; }
         .user-details div:last-child { font-size: 10px; color: var(--text-gray); text-transform: uppercase; letter-spacing: 1px; }
 
-        /* Header */
         .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--bg-dark); border-bottom: 1px solid #2b3139; }
         .logo-r { background: var(--red); color: black; padding: 5px 10px; border-radius: 4px; font-weight: bold; }
 
-        /* Balance Card */
         .asset-card { background: var(--card-bg); margin: 20px; padding: 25px; border-radius: 16px; border-bottom: 3px solid var(--red); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .balance-label { font-size: 13px; color: var(--text-gray); margin-bottom: 8px; }
         .balance-main { font-size: 32px; font-weight: 700; margin: 5px 0; color: var(--text-white); font-family: 'Orbitron', sans-serif; }
         
-        /* Actions */
         .actions-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 0 20px; margin-bottom: 30px; }
         .action-item { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; }
         .icon-box { width: 50px; height: 50px; background: #2b3139; border-radius: 50%; display: flex; align-items: center; justify-content: center; fill: var(--red); transition: 0.3s; }
         .action-item:hover .icon-box { background: rgba(255, 0, 0, 0.2); transform: translateY(-3px); }
         .action-label { font-size: 11px; font-weight: 500; }
 
-        /* Modals */
         .modal { display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.9); backdrop-filter: blur(8px); }
         .modal-content { background: var(--card-bg); margin: 15% auto; padding: 25px; width: 85%; max-width: 350px; border-radius: 20px; border: 1px solid #333; }
         input, select { width: 100%; background: #0b0e11; border: 1px solid #333; color: white; padding: 12px; border-radius: 8px; margin-bottom: 15px; box-sizing: border-box; }
@@ -54,7 +41,7 @@
         <div class="avatar" id="user-initial">U</div>
         <div class="user-details">
             <div id="display-username">@Miner_Guest</div>
-            <div>Verified RTC Miner</div>
+            <div id="miner-type">Verified RTC Miner</div>
         </div>
     </div>
 
@@ -70,8 +57,8 @@
 
     <div class="asset-card">
         <div class="balance-label" id="txt-bal-label">Estimated Balance</div>
-        <div class="balance-main" id="db-balance">500,000.0000 RTC</div>
-        <div class="balance-sub">≈ $<span id="usd-val">25,142.50</span> <span style="color:#0ecb81;">+2.45%</span></div>
+        <div class="balance-main" id="db-balance">0.0000 RTC</div>
+        <div class="balance-sub">≈ $<span id="usd-val">0.00</span> <span style="color:#0ecb81;">+2.45%</span></div>
     </div>
 
     <div class="actions-container">
@@ -125,7 +112,9 @@
     </div></div>
 
     <script>
-        // --- الخطوة 2: ربط اسم المستخدم والمفتاح الخاص ---
+        // --- إعدادات السيرفر الجديد ---
+        const API_URL = "https://rtc-miner-server.onrender.com"; 
+
         window.addEventListener('DOMContentLoaded', () => {
             const savedName = localStorage.getItem('rtc_user') || 'Guest';
             const privateKey = localStorage.getItem('rtc_private_key') || 'No_Key_Found';
@@ -134,37 +123,52 @@
             document.getElementById('user-initial').innerText = savedName.charAt(0).toUpperCase();
             document.getElementById('wallet-key-display').innerText = privateKey;
             
-            updateUI();
+            // جلب البيانات لأول مرة فور الدخول
+            fetchBalanceFromServer();
         });
 
-        let balance = parseFloat(localStorage.getItem('rtc_bal')) || 500000.00;
-        let isMining = false;
-
-        function updateUI() {
-            document.getElementById('db-balance').innerText = balance.toLocaleString(undefined, {minimumFractionDigits: 4}) + " RTC";
-            document.getElementById('usd-val').innerText = (balance * 0.05).toLocaleString();
-            localStorage.setItem('rtc_bal', balance);
+        // --- وظيفة جلب الرصيد الحقيقي من السيرفر ---
+        async function fetchBalanceFromServer() {
+            try {
+                // نستخدم مسار المؤسس الذي عدلناه في main.py
+                const response = await fetch(`${API_URL}/founder_data`);
+                const data = await response.json();
+                
+                if(data.balance) {
+                    const balance = parseFloat(data.balance);
+                    document.getElementById('db-balance').innerText = balance.toLocaleString(undefined, {minimumFractionDigits: 4}) + " RTC";
+                    document.getElementById('usd-val').innerText = (balance * 0.05).toLocaleString();
+                    
+                    // تحديث الحالة لتبين أننا متصلون بالسيرفر
+                    document.getElementById('txt-conn').innerText = "Live Synced";
+                    document.getElementById('txt-conn').style.color = "#0ecb81";
+                }
+            } catch (error) {
+                console.error("Connection lost to mining server...");
+                document.getElementById('txt-conn').innerText = "Offline/Syncing";
+                document.getElementById('txt-conn').style.color = "#ff0000";
+            }
         }
 
+        // تحديث الرصيد كل ثانيتين ليعطى انطباع الحركة السريعة
+        setInterval(fetchBalanceFromServer, 2000);
+
         function startMining() {
-            if(isMining) return;
-            isMining = true;
-            document.getElementById('txt-mine').innerText = "Mining...";
+            // الآن الزر وظيفته بصرية، التعدين الحقيقي يتم في السيرفر للمؤسس
+            document.getElementById('txt-mine').innerText = "Worker Active";
             document.getElementById('mineIcon').style.fill = "#0ecb81";
+            document.getElementById('hash-rate').innerText = (Math.random() * 20 + 35).toFixed(2) + " H/s";
             
-            setInterval(() => {
-                balance += 0.000125; 
-                document.getElementById('hash-rate').innerText = (Math.random() * 20 + 15).toFixed(2) + " H/s";
-                updateUI();
-            }, 1000);
+            alert("Your Miner is connected to the Cloud Node!");
         }
 
         function copyKey() {
             const key = document.getElementById('wallet-key-display').innerText;
             navigator.clipboard.writeText(key);
-            alert('Your Secure Key Copied!');
+            alert('Address Copied!');
         }
 
+        // --- نظام اللغات ---
         const langMap = {
             en: { bal: "Estimated Balance", mine: "Mining", send: "Send", dep: "Deposit", out: "Logout", net: "NETWORK STATUS", set: "Settings", conn: "Connected", dir: "ltr" },
             ar: { bal: "الرصيد التقديري", mine: "تعدين", send: "إرسال", dep: "إيداع", out: "خروج", net: "حالة الشبكة", set: "الإعدادات", conn: "متصل", dir: "rtl" }
