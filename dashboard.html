@@ -4,19 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Redcoin RTC | Pro Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Orbitron:wght@700&display=swap" rel="stylesheet">
     <style>
         :root { --red: #ff0000; --bg-dark: #0b0e11; --card-bg: #1e2329; --text-gray: #848e9c; --text-white: #eaecef; }
         body { background-color: var(--bg-dark); color: var(--text-white); font-family: 'Inter', sans-serif; margin: 0; padding: 0; transition: 0.3s; overflow-x: hidden; }
         
+        /* --- كود تعريف المستخدم الجديد --- */
+        .user-profile-bar {
+            display: flex; align-items: center; gap: 12px; padding: 15px 20px;
+            background: rgba(255,0,0,0.05); border-bottom: 1px solid #2b3139;
+        }
+        .avatar {
+            background: var(--red); color: black; width: 40px; height: 40px; 
+            border-radius: 50%; display: flex; justify-content: center; 
+            align-items: center; font-weight: 800; font-family: 'Orbitron';
+            box-shadow: 0 0 10px rgba(255,0,0,0.3);
+        }
+        .user-details div:first-child { font-weight: bold; font-size: 15px; color: white; }
+        .user-details div:last-child { font-size: 10px; color: var(--text-gray); text-transform: uppercase; letter-spacing: 1px; }
+
         /* Header */
         .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--bg-dark); border-bottom: 1px solid #2b3139; }
         .logo-r { background: var(--red); color: black; padding: 5px 10px; border-radius: 4px; font-weight: bold; }
 
         /* Balance Card */
-        .asset-card { background: var(--card-bg); margin: 20px; padding: 25px; border-radius: 16px; border-bottom: 3px solid var(--red); }
+        .asset-card { background: var(--card-bg); margin: 20px; padding: 25px; border-radius: 16px; border-bottom: 3px solid var(--red); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .balance-label { font-size: 13px; color: var(--text-gray); margin-bottom: 8px; }
-        .balance-main { font-size: 32px; font-weight: 700; margin: 5px 0; color: var(--text-white); }
+        .balance-main { font-size: 32px; font-weight: 700; margin: 5px 0; color: var(--text-white); font-family: 'Orbitron', sans-serif; }
         
         /* Actions */
         .actions-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 0 20px; margin-bottom: 30px; }
@@ -35,6 +49,14 @@
     </style>
 </head>
 <body id="mainBody">
+
+    <div class="user-profile-bar">
+        <div class="avatar" id="user-initial">U</div>
+        <div class="user-details">
+            <div id="display-username">@Miner_Guest</div>
+            <div>Verified RTC Miner</div>
+        </div>
+    </div>
 
     <div class="header">
         <div style="display:flex; align-items:center; gap:10px;">
@@ -73,7 +95,7 @@
 
     <h3 id="txt-net" style="margin:0 20px 10px; font-size:14px; color:var(--text-gray);">NETWORK STATUS</h3>
     <div class="stat-row"><span>Hashrate</span><span id="hash-rate">0.00 H/s</span></div>
-    <div class="stat-row"><span>Status</span><span style="color:#0ecb81;">Connected</span></div>
+    <div class="stat-row"><span>Status</span><span style="color:#0ecb81;" id="txt-conn">Connected</span></div>
 
     <div id="sendModal" class="modal"><div class="modal-content">
         <h2 id="txt-send-h">Send RTC</h2>
@@ -85,8 +107,8 @@
 
     <div id="depositModal" class="modal"><div class="modal-content" style="text-align:center">
         <h2 id="txt-dep-h">Receive</h2>
-        <div style="background:#0b0e11; padding:15px; border-radius:10px; font-size:11px; border:1px dashed var(--red); margin-bottom:15px;">RTC_Admin_Master_Secure_Node_2026</div>
-        <button class="btn-action" onclick="navigator.clipboard.writeText('RTC_Admin_Master_Secure_Node_2026'); alert('Copied!')">Copy Address</button>
+        <div id="wallet-key-display" style="background:#0b0e11; padding:15px; border-radius:10px; font-size:11px; border:1px dashed var(--red); margin-bottom:15px; word-break:break-all;">Loading Key...</div>
+        <button class="btn-action" onclick="copyKey()">Copy Address</button>
         <button class="btn-action" style="background:#333; margin-top:10px" onclick="closeModal('depositModal')">Close</button>
     </div></div>
 
@@ -103,13 +125,24 @@
     </div></div>
 
     <script>
-        // --- المنطق المالي (الرصيد الحي) ---
+        // --- الخطوة 2: ربط اسم المستخدم والمفتاح الخاص ---
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedName = localStorage.getItem('rtc_user') || 'Guest';
+            const privateKey = localStorage.getItem('rtc_private_key') || 'No_Key_Found';
+            
+            document.getElementById('display-username').innerText = `@${savedName.toLowerCase()}`;
+            document.getElementById('user-initial').innerText = savedName.charAt(0).toUpperCase();
+            document.getElementById('wallet-key-display').innerText = privateKey;
+            
+            updateUI();
+        });
+
         let balance = parseFloat(localStorage.getItem('rtc_bal')) || 500000.00;
         let isMining = false;
 
         function updateUI() {
             document.getElementById('db-balance').innerText = balance.toLocaleString(undefined, {minimumFractionDigits: 4}) + " RTC";
-            document.getElementById('usd-val').innerText = (balance * 0.05).toLocaleString(); // سعر افتراضي 0.05$
+            document.getElementById('usd-val').innerText = (balance * 0.05).toLocaleString();
             localStorage.setItem('rtc_bal', balance);
         }
 
@@ -120,16 +153,21 @@
             document.getElementById('mineIcon').style.fill = "#0ecb81";
             
             setInterval(() => {
-                balance += 0.000125; // مقدار الربح في الثانية
+                balance += 0.000125; 
                 document.getElementById('hash-rate').innerText = (Math.random() * 20 + 15).toFixed(2) + " H/s";
                 updateUI();
             }, 1000);
         }
 
-        // --- نظام اللغات والواجهة ---
+        function copyKey() {
+            const key = document.getElementById('wallet-key-display').innerText;
+            navigator.clipboard.writeText(key);
+            alert('Your Secure Key Copied!');
+        }
+
         const langMap = {
-            en: { bal: "Estimated Balance", mine: "Mining", send: "Send", dep: "Deposit", out: "Logout", net: "NETWORK STATUS", set: "Settings", dir: "ltr" },
-            ar: { bal: "الرصيد التقديري", mine: "تعدين", send: "إرسال", dep: "إيداع", out: "خروج", net: "حالة الشبكة", set: "الإعدادات", dir: "rtl" }
+            en: { bal: "Estimated Balance", mine: "Mining", send: "Send", dep: "Deposit", out: "Logout", net: "NETWORK STATUS", set: "Settings", conn: "Connected", dir: "ltr" },
+            ar: { bal: "الرصيد التقديري", mine: "تعدين", send: "إرسال", dep: "إيداع", out: "خروج", net: "حالة الشبكة", set: "الإعدادات", conn: "متصل", dir: "rtl" }
         };
 
         function changeLang(l) {
@@ -141,13 +179,12 @@
             document.getElementById('txt-logout').innerText = d.out;
             document.getElementById('txt-net').innerText = d.net;
             document.getElementById('txt-set-h').innerText = d.set;
+            document.getElementById('txt-conn').innerText = d.conn;
             document.body.style.direction = d.dir;
         }
 
         function openModal(id) { document.getElementById(id).style.display = 'block'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-        
-        updateUI(); // تشغيل عند البدء
     </script>
 </body>
 </html>
