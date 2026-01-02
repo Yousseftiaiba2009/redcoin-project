@@ -1,98 +1,68 @@
 import time
 import threading
-import uuid
-import json
 import os
-from flask import Flask, jsonify, request
-from flask_cors import CORS 
+import json
+from flask import Flask, jsonify
+from flask_cors import CORS
 
 app = Flask(__name__)
-# تفعيل CORS الشامل للسماح للمحفظة على GitHub بالوصول للبيانات
-CORS(app, resources={r"/*": {"origins": "*"}}) 
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # --- إعدادات الملفات ---
 WALLETS_FILE = "wallets_db.json"
-LOG_FILE = "blockchain_log.json"
+FOUNDER_ADDR = "RTC-FOUNDER-001"
+DEFAULT_START = 500000.0  # الرصيد الافتراضي فقط إذا كان السيرفر جديداً كلياً
+MINING_SPEED = 0.05       # سرعة التعدين الصاروخية للمليون
 
-# --- إعدادات المؤسس (قمت بتسريعها هنا) ---
-START_BALANCE = 500000.0
-# سرعة التعدين: 0.00125 تعني زيادة ملحوظة في كل ثانية
-MINING_SPEED = 0.05
-FOUNDER_KEY = "RTC_ADMIN_2025_SECURE"
-
-# --- وظائف إدارة البيانات ---
-
-def load_all_wallets():
+# --- وظيفة جلب الرصيد الحقيقي من السيرفر ---
+def get_current_balance():
     if os.path.exists(WALLETS_FILE):
         try:
             with open(WALLETS_FILE, 'r') as f:
-                return json.load(f)
+                data = json.load(f)
+                if FOUNDER_ADDR in data:
+                    return data[FOUNDER_ADDR]['balance']
         except:
             pass
-    
-    # إنشاء محفظة المؤسس الافتراضية إذا كان الملف غير موجود
-    return {
-        "RTC-FOUNDER-001": {
-            "balance": START_BALANCE,
-            "key": FOUNDER_KEY,
-            "type": "Founder"
-        }
-    }
+    return DEFAULT_START
 
-def save_all_wallets():
+# تهيئة الرصيد من السيرفر مباشرة عند التشغيل
+current_balance = get_current_balance()
+
+wallets = {
+    FOUNDER_ADDR: {
+        "balance": current_balance,
+        "key": "RTC_ADMIN_2025_SECURE",
+        "type": "Founder"
+    }
+}
+
+# --- وظيفة حفظ البيانات الدورية ---
+def save_data():
     with open(WALLETS_FILE, 'w') as f:
         json.dump(wallets, f)
 
-# تهيئة البيانات
-wallets = load_all_wallets()
-
-# --- محرك التعدين المستمر ---
+# --- محرك التعدين ---
 def mining_worker():
+    global wallets
     while True:
-        # تعدين الرصيد للمؤسس
-        wallets["RTC-FOUNDER-001"]["balance"] += MINING_SPEED
+        # الزيادة تحدث على الرقم المستلم من السيرفر
+        wallets[FOUNDER_ADDR]["balance"] += MINING_SPEED
         
-        # حفظ البيانات دورياً كل دقيقة (للحفاظ على موارد Render)
-        current_time = int(time.time())
-        if current_time % 60 == 0:
-            save_all_wallets()
-            
-        time.sleep(1) # نبض السيرفر (تحديث كل ثانية)
+        # حفظ كل 10 ثواني لضمان عدم ضياع أي كسر من العملة
+        if int(time.time()) % 10 == 0:
+            save_data()
+        time.sleep(1)
 
-# تشغيل محرك التعدين في الخلفية
 threading.Thread(target=mining_worker, daemon=True).start()
 
-# --- المسارات البرمجية (API) ---
-
-@app.route('/')
-def status():
-    # هذا المسار سيعرض رصيدك المحدث فوراً عند فتحه
-    return jsonify({
-        "coin": "Redcoin (RTC)",
-        "founder_balance": round(wallets["RTC-FOUNDER-001"]["balance"], 4),
-        "total_miners": len(wallets),
-        "status": "Network Live",
-        "speed_per_sec": MINING_SPEED
-    })
-
-@app.route('/balance/<address>')
-def check_balance(address):
-    # مسار أساسي تستخدمه المحفظة لتحديث رصيدك في الواجهة
-    if address in wallets:
-        return jsonify({
-            "address": address, 
-            "balance": round(wallets[address]['balance'], 6)
-        })
-    return jsonify({"error": "Wallet Not Found"}), 404
-
-# مسار خاص للسماح للمحفظة بجلب رصيد المؤسس مباشرة
 @app.route('/founder_data')
 def founder_data():
     return jsonify({
-        "balance": round(wallets["RTC-FOUNDER-001"]["balance"], 4)
+        "balance": round(wallets[FOUNDER_ADDR]['balance'], 4),
+        "status": "Syncing from Server"
     })
 
 if __name__ == "__main__":
-    # الحصول على المنفذ من Render
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
