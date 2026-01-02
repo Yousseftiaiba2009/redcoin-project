@@ -3,164 +3,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redcoin | Secure Registration</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <title>Redcoin RTC | Official Gateway</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --red: #ff0000; --bg: #0b0e11; --card: #1e2329; --yellow: #f0b90b; }
-        body { 
-            background: var(--bg); 
-            color: white; 
-            font-family: 'Inter', sans-serif; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
+        :root {
+            --red-main: #ff0000;
+            --dark-bg: #0b0e11;
+            --card-bg: #1e2329;
+            --text-gray: #848e9c;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: white;
+            font-family: 'Inter', sans-serif;
             margin: 0;
-            background-image: radial-gradient(circle at 0% 0%, rgba(255,0,0,0.05) 0%, transparent 50%);
-        }
-
-        .reg-card { 
-            background: var(--card); 
-            padding: 40px; 
-            border-radius: 24px; 
-            width: 100%; 
-            max-width: 420px; 
-            border: 1px solid #2b3139;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-        }
-
-        .logo { 
-            font-family: 'Orbitron', sans-serif; 
-            color: var(--red); 
-            font-size: 28px; 
-            margin-bottom: 10px; 
+            padding: 0;
             text-align: center;
+        }
+
+        /* Navbar Section */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            border-bottom: 1px solid #2b3139;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 22px;
+            font-weight: 900;
+        }
+
+        .logo-symbol {
+            background: var(--red-main);
+            color: black;
+            padding: 5px 12px;
+            border-radius: 6px;
+            margin-right: 10px;
+        }
+
+        .nav-auth button {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .btn-login { background: #2b3139; color: white; margin-right: 10px; }
+        .btn-signup { background: var(--red-main); color: white; }
+
+        /* Main Hero Section */
+        .hero {
+            padding: 80px 20px;
+            background: radial-gradient(circle at top, rgba(255,0,0,0.15) 0%, transparent 70%);
+        }
+
+        .welcome-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(32px, 8vw, 56px);
+            color: var(--red-main);
+            margin: 0 0 20px 0;
+            text-transform: uppercase;
             letter-spacing: 2px;
         }
 
-        h2 { text-align: center; margin-bottom: 25px; font-weight: 800; font-size: 22px; }
-
-        /* Warning Box */
-        .warning-box {
-            background: rgba(240, 185, 11, 0.1);
-            border-left: 4px solid var(--yellow);
-            padding: 15px;
-            margin-bottom: 25px;
-            border-radius: 8px;
-        }
-        .warning-box h4 { color: var(--yellow); margin: 0 0 5px 0; font-size: 14px; display: flex; align-items: center; gap: 8px; }
-        .warning-box p { margin: 0; font-size: 12px; color: #eaecef; line-height: 1.4; }
-
-        .input-group { margin-bottom: 18px; text-align: left; }
-        label { display: block; margin-bottom: 8px; font-size: 13px; color: #848e9c; }
-        
-        input { 
-            width: 100%; 
-            padding: 14px; 
-            border-radius: 10px; 
-            border: 1px solid #2b3139; 
-            background: #0b0e11; 
-            color: white; 
-            box-sizing: border-box; 
-            font-size: 15px;
-            transition: 0.3s;
-        }
-        input:focus { border-color: var(--red); outline: none; background: #161a1e; }
-
-        .key-display {
-            background: #0b0e11;
-            padding: 12px;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 12px;
-            color: var(--red);
-            border: 1px dashed #444;
-            word-break: break-all;
-            margin-top: 10px;
-            display: none;
+        .hero-desc {
+            color: var(--text-gray);
+            font-size: 18px;
+            max-width: 650px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
         }
 
-        .btn-reg { 
-            width: 100%; 
-            padding: 16px; 
-            background: var(--red); 
-            border: none; 
-            border-radius: 12px; 
-            color: white; 
-            font-weight: 900; 
-            cursor: pointer; 
-            font-size: 16px; 
-            margin-top: 10px;
+        .btn-start {
+            background: var(--red-main);
+            color: white;
+            padding: 18px 50px;
+            border-radius: 12px;
             font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 18px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(255,0,0,0.3);
             transition: 0.3s;
         }
-        .btn-reg:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,0,0,0.3); }
 
-        .footer-text { margin-top: 25px; text-align: center; font-size: 14px; color: #848e9c; }
-        .footer-text a { color: var(--red); text-decoration: none; font-weight: 600; }
+        .btn-start:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(255,0,0,0.5); }
+
+        /* Stats Section */
+        .stats-grid {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 40px 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid #2b3139;
+            border-radius: 15px;
+            padding: 25px;
+            width: 280px;
+            text-align: left;
+            transition: 0.3s;
+        }
+
+        .stat-card:hover { border-color: var(--red-main); }
+        .stat-label { color: var(--text-gray); font-size: 12px; text-transform: uppercase; }
+        .stat-value { font-size: 24px; font-weight: 800; margin-top: 10px; }
+
+        /* Feature Section */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .feature-box {
+            text-align: left;
+            padding: 20px;
+        }
+
+        .feature-box h3 { color: var(--red-main); font-family: 'Orbitron', sans-serif; margin-bottom: 10px; }
+        .feature-box p { color: var(--text-gray); font-size: 14px; line-height: 1.5; }
+
     </style>
 </head>
 <body>
 
-    <div class="reg-card">
-        <div class="logo">REDCOIN</div>
-        <h2>Create Miner ID</h2>
-
-        <div class="warning-box">
-            <h4>⚠️ SECURITY ALERT</h4>
-            <p>Your Private Key is the only way to access your funds. If you lose it, your RTC balance will be gone forever. We do not store your keys.</p>
+    <header>
+        <div class="logo"><span class="logo-symbol">R</span> REDCOIN</div>
+        <div class="nav-auth">
+            <button class="btn-login" onclick="window.location.href='login.html'">LOGIN</button>
+            <button class="btn-signup" onclick="window.location.href='register.html'">SIGN UP</button>
         </div>
+    </header>
 
-        <form id="regForm">
-            <div class="input-group">
-                <label>USERNAME</label>
-                <input type="text" id="reg-user" placeholder="Enter your miner name" required>
-            </div>
-            
-            <div class="input-group">
-                <label>PASSWORD</label>
-                <input type="password" id="reg-pass" placeholder="Minimum 8 characters" required>
-            </div>
+    <section class="hero">
+        <h1 class="welcome-title" id="user-greeting">WELCOME, GUEST</h1>
+        <p class="hero-desc">
+            Redcoin (RTC) is a decentralized micropayment infrastructure designed for the digital age. 
+            Mine, earn, and transfer assets globally with zero-barrier entry.
+        </p>
+        <button class="btn-start" onclick="window.location.href='dashboard.html'">START MINING</button>
+    </section>
 
-            <div id="key-section" style="margin-bottom: 20px;">
-                <label>YOUR GENERATED PRIVATE KEY</label>
-                <div id="private-key" class="key-display"></div>
-                <button type="button" id="gen-key" style="background:none; border:none; color:var(--red); font-size:12px; cursor:pointer; padding:0; margin-top:5px;">[ Click to generate secure key ]</button>
-            </div>
-
-            <button type="submit" class="btn-reg">SECURE SIGN UP</button>
-        </form>
-
-        <div class="footer-text">
-            Already a member? <a href="login.html">Login to Portal</a>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Master Balance</div>
+            <div class="stat-value" id="master-balance">500,000.00 RTC</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Network Status</div>
+            <div class="stat-value" style="color: #00ff00;">ONLINE</div>
         </div>
     </div>
 
+    <section class="features">
+        <div class="feature-box">
+            <h3>🌐 BROWSER MINING</h3>
+            <p>Mine RTC directly from your browser. No extra software required.</p>
+        </div>
+        <div class="feature-box">
+            <h3>⚡ INSTANT PAYMENTS</h3>
+            <p>Optimized for lightning-fast transfers with near-zero transaction fees.</p>
+        </div>
+        <div class="feature-box">
+            <h3>🛡️ SECURE ASSETS</h3>
+            <p>Your private keys remain yours. Full control over your digital wealth.</p>
+        </div>
+    </section>
+
     <script>
-        // توليد مفتاح عشوائي للمستخدم
-        document.getElementById('gen-key').onclick = function() {
-            const randomKey = 'RTC-' + Math.random().toString(36).substring(2, 15).toUpperCase() + Math.random().toString(36).substring(2, 15).toUpperCase();
-            const keyDisplay = document.getElementById('private-key');
-            keyDisplay.innerText = randomKey;
-            keyDisplay.style.display = 'block';
-            this.style.display = 'none';
-            localStorage.setItem('rtc_private_key', randomKey);
-        };
+        // ترحيب مخصص
+        const savedUser = localStorage.getItem('rtc_user') || 'GUEST';
+        document.getElementById('user-greeting').innerText = `WELCOME, ${savedUser.toUpperCase()}`;
 
-        document.getElementById('regForm').onsubmit = function(e) {
-            e.preventDefault();
-            const username = document.getElementById('reg-user').value;
-            const key = document.getElementById('private-key').innerText;
-
-            if(!key) {
-                alert('Please generate your Private Key first!');
-                return;
-            }
-
-            localStorage.setItem('rtc_user', username);
-            alert('CRITICAL: Account Created. Make sure you copied your key!');
-            window.location.href = 'dashboard.html';
-        };
+        // جلب البيانات الحية (اختياري)
+        async function updateLiveStats() {
+            try {
+                const res = await fetch('https://rtc-miner-server.onrender.com/');
+                const data = await res.json();
+                if(data.balance) document.getElementById('master-balance').innerText = data.balance + " RTC";
+            } catch(e) { console.log("Re-connecting to blockchain..."); }
+        }
+        updateLiveStats();
     </script>
 </body>
 </html>
