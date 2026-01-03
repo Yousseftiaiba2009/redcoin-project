@@ -3,105 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redcoin RTC | Founder Wallet</title>
+    <title>Redcoin RTC | Founder Dashboard</title>
     <style>
-        :root { --red: #ff0000; --bg: #0b0e11; --card: #1e2329; --green: #0ecb81; }
+        :root { --red: #ff0000; --bg: #0b0e11; --card: #1e2329; --green: #0ecb81; --gold: #ffb100; }
         body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; text-align: center; }
         .header { padding: 25px; border-bottom: 1px solid #2b3139; background: var(--bg); }
-        .card { background: var(--card); margin: 20px; padding: 40px 20px; border-radius: 20px; border-bottom: 5px solid var(--red); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .balance { font-size: 36px; font-weight: 800; margin: 10px 0; color: #fff; font-variant-numeric: tabular-nums; letter-spacing: 1px; }
-        .usd { color: var(--green); font-size: 18px; margin-bottom: 10px; font-weight: bold; }
+        .card { background: var(--card); margin: 20px auto; padding: 40px 20px; border-radius: 20px; border-bottom: 5px solid var(--red); max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .balance { font-size: 32px; font-weight: 800; margin: 10px 0; color: #fff; font-variant-numeric: tabular-nums; }
+        .usd { color: var(--green); font-size: 18px; margin-bottom: 20px; font-weight: bold; }
         
-        /* تصميم خانة أرباح الجلسة الجديدة */
-        .session-box { 
-            background: rgba(255, 177, 0, 0.1); 
-            border: 1px solid rgba(255, 177, 0, 0.2);
-            border-radius: 12px; 
-            padding: 15px; 
-            margin: 15px auto;
-            max-width: 280px;
-        }
+        .session-info { background: rgba(255, 177, 0, 0.1); border: 1px dashed var(--gold); border-radius: 12px; padding: 15px; margin-bottom: 20px; }
         .session-label { color: #848e9c; font-size: 11px; text-transform: uppercase; margin-bottom: 5px; }
-        .session-value { color: #ffb100; font-weight: bold; font-size: 20px; }
+        .session-value { color: var(--gold); font-weight: bold; font-size: 20px; }
 
-        .status-box { display: inline-flex; align-items: center; gap: 8px; background: rgba(14, 203, 129, 0.1); padding: 8px 20px; border-radius: 20px; font-size: 13px; }
-        .dot { width: 10px; height: 10px; background: var(--green); border-radius: 50%; box-shadow: 0 0 10px var(--green); animation: blink 1.5s infinite; }
-        @keyframes blink { 0% { opacity: 0.2; } 50% { opacity: 1; } 100% { opacity: 0.2; } }
-        .btn { background: var(--red); color: white; border: none; padding: 15px 40px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .status-box { display: inline-flex; align-items: center; gap: 8px; background: rgba(14, 203, 129, 0.1); padding: 8px 20px; border-radius: 20px; font-size: 12px; }
+        .dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 0.2; } 50% { opacity: 1; } 100% { opacity: 0.2; } }
+        .btn { background: var(--red); color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
     </style>
 </head>
 <body>
     <div class="header">
-        <h2 style="margin:0; letter-spacing: 3px;">REDCOIN <span style="color:var(--red)">RTC</span></h2>
+        <h2 style="margin:0;">REDCOIN <span style="color:var(--red)">RTC</span></h2>
     </div>
 
     <div class="card">
-        <div style="color: #848e9c; font-size: 13px; text-transform: uppercase; font-weight: 600;">Founder Total Assets</div>
-        <div class="balance" id="balance">Retrieving...</div>
-        <div class="usd" id="usd-value">$0.00 USD</div>
+        <div style="color: #848e9c; font-size: 12px; text-transform: uppercase;">Total Founder Balance</div>
+        <div class="balance" id="balance">0.000000 RTC</div>
+        <div class="usd" id="usd-val">$0.00 USD</div>
         
-        <div class="session-box">
-            <div class="session-label">Mined Since Server Startup</div>
-            <div class="session-value" id="session-profit">0.000000 RTC</div>
+        <div class="session-info">
+            <div class="session-label">Mined in Current Session</div>
+            <div class="session-value" id="session-profit">+0.000000 RTC</div>
         </div>
 
         <div class="status-box">
             <div class="dot"></div>
-            <span id="status-text" style="color: var(--green);">Synchronizing with Node...</span>
+            <span id="status-text">Difficulty: Stable (0.0005/s)</span>
         </div>
     </div>
 
-    <button class="btn" onclick="fetchFromServer()">FORCE SYNC</button>
+    <button class="btn" onclick="fetchData()">FORCE SYNC</button>
 
     <script>
         const API_URL = "https://rtc-miner-server.onrender.com";
-        let currentBalance = 0;
-        let sessionProfit = 0;
-        let lastServerTime = Date.now();
-        const MINING_RATE = 0.0005;
+        let currentBal = 0;
+        let sessionProf = 0;
+        let lastUpdate = Date.now();
+        const RATE = 0.0005;
 
-        async function fetchFromServer() {
+        async function fetchData() {
             try {
-                const response = await fetch(`${API_URL}/founder_data?t=${Date.now()}`);
-                const data = await response.json();
-                
-                if(data.balance !== undefined) {
-                    currentBalance = parseFloat(data.balance);
-                    sessionProfit = parseFloat(data.session_profit || 0);
-                    lastServerTime = Date.now();
-                    document.getElementById('status-text').innerText = "Network Live: 0.0005/s";
+                const res = await fetch(`${API_URL}/founder_data?t=${Date.now()}`);
+                const data = await res.json();
+                if(data.balance) {
+                    currentBal = data.balance;
+                    sessionProf = data.session_profit;
+                    lastUpdate = Date.now();
                 }
-            } catch (err) {
-                document.getElementById('status-text').innerText = "Reconnecting...";
-                document.getElementById('status-text').style.color = "#ffb100";
-            }
+            } catch(e) { console.log("Reconnecting..."); }
         }
 
-        function smoothDisplay() {
-            if(currentBalance > 0) {
-                const elapsed = (Date.now() - lastServerTime) / 1000;
+        function updateUI() {
+            if(currentBal > 0) {
+                const sec = (Date.now() - lastUpdate) / 1000;
+                const visualBal = currentBal + (RATE * sec);
+                const visualSess = sessionProf + (RATE * sec);
                 
-                // تحديث الرصيد الإجمالي بصرياً
-                const visualBalance = currentBalance + (MINING_RATE * elapsed);
-                document.getElementById('balance').innerText = visualBalance.toLocaleString(undefined, {
-                    minimumFractionDigits: 4, maximumFractionDigits: 4
-                }) + " RTC";
-                
-                // تحديث أرباح الجلسة بصرياً
-                const visualSession = sessionProfit + (MINING_RATE * elapsed);
-                document.getElementById('session-profit').innerText = "+" + visualSession.toFixed(6) + " RTC";
-                
-                // تحديث القيمة بالدولار
-                document.getElementById('usd-value').innerText = "$" + (visualBalance * 0.05).toLocaleString(undefined, {
-                    minimumFractionDigits: 2, maximumFractionDigits: 2
-                }) + " USD";
+                document.getElementById('balance').innerText = visualBal.toLocaleString(undefined, {minimumFractionDigits: 6}) + " RTC";
+                document.getElementById('session-profit').innerText = "+" + visualSess.toFixed(6) + " RTC";
+                document.getElementById('usd-val').innerText = "$" + (visualBal * 0.05).toLocaleString(undefined, {minimumFractionDigits: 2});
             }
-            requestAnimationFrame(smoothDisplay);
+            requestAnimationFrame(updateUI);
         }
 
-        setInterval(fetchFromServer, 3000);
-        fetchFromServer();
-        smoothDisplay();
+        setInterval(fetchData, 4000);
+        fetchData();
+        updateUI();
     </script>
 </body>
 </html>
