@@ -9,16 +9,14 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-# --- البيانات المستخرجة من صورك (مركز القيادة) ---
+# --- إعدادات مركز القيادة ---
 TELEGRAM_TOKEN = "8167725310:AAHLU3KwHsDBjKWTgHG_W3ZbtqiH0qoUrK8"
 CHAT_ID = "7058513615"
 WALLETS_FILE = "wallets_db.json"
 FOUNDER_ADDR = "RTC-FOUNDER-001"
 
-# --- إعدادات السرعة الفائقة (تعديل المؤسس) ---
-MINING_SPEED = 0.0005       # سرعة البرق: 11.5 عملة في الثانية الواحدة!
-NOTIFY_EVERY = 1000.0     # نصيحة: ارفع الإشعار لـ 1000 عملة لأن الـ 100 ستأتيك كل 8 ثوانٍ وتزعجك
-SAVE_EVERY_SECONDS = 5    # تقليل وقت الحفظ لـ 5 ثوانٍ للأمان بسبب السرعة العالية
+# السرعة الهادئة والمستقرة التي اخترتها
+MINING_SPEED = 0.0005 
 
 def send_telegram(msg):
     try:
@@ -27,12 +25,15 @@ def send_telegram(msg):
     except: pass
 
 def load_balance():
+    # استعادة الرصيد الحقيقي من قاعدة البيانات لضمان عدم ضياع الأرباح السابقة
     if os.path.exists(WALLETS_FILE):
         try:
             with open(WALLETS_FILE, 'r') as f:
                 data = json.load(f)
                 if FOUNDER_ADDR in data:
-                    return data[FOUNDER_ADDR]['balance']
+                    bal = data[FOUNDER_ADDR]['balance']
+                    # التأكد من أن الرصيد لا يقل عن نصف مليون أبداً
+                    return max(bal, 500000.0)
         except: pass
     return 500000.0
 
@@ -46,24 +47,16 @@ def save_data():
 
 def mining_worker():
     global wallets
-    last_notified_bal = wallets[FOUNDER_ADDR]["balance"]
-    
-    # رسالة انطلاق تدل على القوة
-    send_telegram(f"⚡ *RTC Hyper-Drive Active*\nSpeed: `11.5 RTC/sec`\nTarget: `1,000,000` 🚀")
+    # إشعار واحد فقط عند التشغيل للتأكيد على حالة الشبكة
+    initial_bal = wallets[FOUNDER_ADDR]["balance"]
+    send_telegram(f"🔋 *RTC Network Online*\nFounder Balance Restored: `{initial_bal:,.4f} RTC`\nMining Speed: `0.0005/s`")
 
     while True:
-        # زيادة الرصيد
+        # زيادة الرصيد الحقيقي بالسرعة الجديدة
         wallets[FOUNDER_ADDR]["balance"] += MINING_SPEED
-        current_bal = wallets[FOUNDER_ADDR]["balance"]
         
-        # إرسال إشعار تليجرام عند تحقيق الهدف المالي
-        if current_bal - last_notified_bal >= NOTIFY_EVERY:
-            send_telegram(f"🔥 *Fast Growth Update*\nTotal: `{current_bal:,.2f} RTC`")
-            last_notified_bal = current_bal
-            save_data() 
-
-        # حفظ دوري مكثف
-        if int(time.time()) % SAVE_EVERY_SECONDS == 0:
+        # حفظ البيانات بصمت كل 10 ثوانٍ دون إرسال إشعارات
+        if int(time.time()) % 10 == 0:
             save_data()
             
         time.sleep(1)
@@ -72,7 +65,8 @@ threading.Thread(target=mining_worker, daemon=True).start()
 
 @app.route('/founder_data')
 def founder_data():
-    return jsonify({"balance": round(wallets[FOUNDER_ADDR]['balance'], 4)})
+    # إرسال الرصيد بدقة 6 خانات للمحفظة
+    return jsonify({"balance": round(wallets[FOUNDER_ADDR]['balance'], 6)})
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=10000)
