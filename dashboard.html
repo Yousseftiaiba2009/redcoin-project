@@ -3,51 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redcoin RTC | Founder Wallet</title>
+    <title>Redcoin RTC | Founder Control</title>
     <style>
-        :root { --red: #ff0000; --bg: #0b0e11; --card: #1e2329; }
-        body { background: var(--bg); color: white; font-family: sans-serif; margin: 0; text-align: center; }
-        .header { padding: 20px; border-bottom: 1px solid #2b3139; background: var(--bg); }
-        .card { background: var(--card); margin: 20px; padding: 30px; border-radius: 15px; border-bottom: 4px solid var(--red); }
-        .balance { font-size: 32px; font-weight: bold; margin: 10px 0; color: #fff; }
-        .status { font-size: 12px; color: #0ecb81; }
-        .btn { background: var(--red); color: white; border: none; padding: 15px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+        :root { --red: #ff0000; --bg: #0b0e11; --card: #1e2329; --green: #0ecb81; }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; text-align: center; overflow: hidden; }
+        .header { padding: 25px; border-bottom: 1px solid #2b3139; background: var(--bg); letter-spacing: 2px; }
+        .card { background: var(--card); margin: 20px; padding: 40px 20px; border-radius: 20px; border-bottom: 5px solid var(--red); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .balance { font-size: 42px; font-weight: 800; margin: 15px 0; color: #fff; font-variant-numeric: tabular-nums; }
+        .usd { color: var(--green); font-size: 18px; margin-bottom: 10px; font-weight: bold; }
+        .status-box { display: inline-flex; align-items: center; gap: 8px; background: rgba(14, 203, 129, 0.1); padding: 5px 15px; border-radius: 20px; font-size: 12px; }
+        .dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; box-shadow: 0 0 10px var(--green); animation: blink 1s infinite; }
+        @keyframes blink { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
+        .btn { background: var(--red); color: white; border: none; padding: 15px 40px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn:hover { transform: scale(1.05); filter: brightness(1.2); }
     </style>
 </head>
 <body>
     <div class="header">
-        <h2>REDCOIN <span style="color:var(--red)">RTC</span></h2>
+        <h2 style="margin:0;">REDCOIN <span style="color:var(--red)">RTC</span></h2>
     </div>
 
     <div class="card">
-        <div style="color: #848e9c; font-size: 14px;">Founder Balance</div>
-        <div class="balance" id="balance">0.0000 RTC</div>
-        <div id="status" class="status">Connecting to Node...</div>
+        <div style="color: #848e9c; font-size: 14px; text-transform: uppercase;">Founder Real-Time Wealth</div>
+        <div class="balance" id="balance">0.00 RTC</div>
+        <div class="usd" id="usd-value">$0.00 USD</div>
+        
+        <div class="status-box">
+            <div class="dot" id="status-dot"></div>
+            <span id="status-text" style="color: var(--green);">Connecting to Mainnet...</span>
+        </div>
     </div>
 
-    <button class="btn" onclick="location.reload()">Refresh Network</button>
+    <button class="btn" onclick="location.reload()">SYNC BLOCKCHAIN</button>
 
     <script>
         const API_URL = "https://rtc-miner-server.onrender.com";
-        const FOUNDER_ID = "7058513615"; // معرفك من الصورة
+        let currentBalance = 0;
+        let lastServerTime = Date.now();
+        const MINING_RATE = 150.0; // تأكد أن هذا الرقم يطابق MINING_SPEED في السيرفر
 
-        async function updateWallet() {
+        async function fetchFromServer() {
             try {
                 const response = await fetch(`${API_URL}/founder_data?t=${Date.now()}`);
                 const data = await response.json();
                 if(data.balance) {
-                    document.getElementById('balance').innerText = parseFloat(data.balance).toLocaleString(undefined, {minimumFractionDigits: 4}) + " RTC";
-                    document.getElementById('status').innerText = "● Mainnet Live (Turbo 0.5/s)";
-                    document.getElementById('status').style.color = "#0ecb81";
+                    currentBalance = parseFloat(data.balance);
+                    lastServerTime = Date.now();
+                    document.getElementById('status-text').innerText = "LIVE: HYPER-DRIVE 150/s";
                 }
             } catch (err) {
-                document.getElementById('status').innerText = "○ Syncing with Server...";
-                document.getElementById('status').style.color = "#ffb100";
+                document.getElementById('status-text').innerText = "Syncing...";
+                document.getElementById('status-text').style.color = "#ffb100";
+                document.getElementById('status-dot').style.background = "#ffb100";
             }
         }
 
-        setInterval(updateWallet, 1000);
-        updateWallet();
+        function smoothDisplay() {
+            if(currentBalance > 0) {
+                // حساب الفارق الزمني منذ آخر تحديث من السيرفر لإضافة الزيادة "بصرياً"
+                const elapsed = (Date.now() - lastServerTime) / 1000;
+                const visualBalance = currentBalance + (MINING_RATE * elapsed);
+                
+                document.getElementById('balance').innerText = visualBalance.toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }) + " RTC";
+                
+                // تحديث القيمة بالدولار (بناءً على سعر 0.05$ افتراضي)
+                document.getElementById('usd-value').innerText = "$" + (visualBalance * 0.05).toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }) + " USD";
+            }
+            requestAnimationFrame(smoothDisplay);
+        }
+
+        // جلب البيانات من السيرفر كل ثانية
+        setInterval(fetchFromServer, 1000);
+        
+        // تشغيل العداد الانسيابي
+        fetchFromServer();
+        smoothDisplay();
     </script>
 </body>
 </html>
