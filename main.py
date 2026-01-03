@@ -13,7 +13,7 @@ WALLETS_FILE = "wallets_db.json"
 FOUNDER_ADDR = "RTC-FOUNDER-001"
 
 # السرعة التي اعتمدناها (0.0005) لضمان صعوبة التعدين وندرة العملة
-MINING_SPEED = 0.0005 
+MINING_SPEED = 0.00005 
 
 # متغيرات الجلسة لمراقبة الأداء منذ التشغيل
 start_time = time.time()
