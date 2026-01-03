@@ -3,46 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redcoin RTC | Official Wallet</title>
+    <title>Redcoin RTC | Founder Wallet</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --red: #ff0000; --bg: #0b0e11; --card: #1e2329; --green: #0ecb81; }
-        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
-        
-        /* Header */
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
         .header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
         .logo-box { display: flex; align-items: center; gap: 10px; }
         .logo-icon { background: var(--red); color: white; padding: 5px 10px; border-radius: 5px; font-weight: bold; }
-
-        /* Balance Card */
-        .card { 
-            background: var(--card); 
-            margin: 20px; 
-            padding: 30px 20px; 
-            border-radius: 15px; 
-            border-bottom: 2px solid var(--red);
-            text-align: left;
-        }
-        /* تحسين عرض الأرقام لمنع الاهتزاز */
-        .balance { font-size: 26px; font-weight: bold; margin: 10px 0; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .card { background: var(--card); margin: 20px; padding: 30px 20px; border-radius: 15px; border-bottom: 2px solid var(--red); }
+        .balance { font-size: 26px; font-weight: bold; margin: 10px 0; font-variant-numeric: tabular-nums; letter-spacing: 0.5px; }
         .usd-val { color: #848e9c; font-size: 16px; font-weight: 600; }
-        .green { color: var(--green); margin-left: 5px; }
-
-        /* Buttons */
         .actions { display: flex; justify-content: space-around; margin: 30px 10px; }
-        .action-item { display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; border: none; background: none; color: white; transition: 0.2s; }
-        .icon-circle { 
-            width: 55px; height: 55px; 
-            background: #2b3139; 
-            border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            font-size: 20px; 
-        }
+        .action-item { display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; border: none; background: none; color: white; }
+        .icon-circle { width: 55px; height: 55px; background: #2b3139; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: 0.2s; }
         .icon-circle.active { color: var(--red); border: 1px solid var(--red); }
-        .action-item span { font-size: 12px; color: #848e9c; }
-        .action-item:active { transform: scale(0.9); }
-
-        /* Stats */
         .network-section { margin: 0 25px; text-align: left; }
         .stat-row { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #1e2329; padding-bottom: 8px; }
     </style>
@@ -50,96 +25,65 @@
 <body>
 
     <div class="header">
-        <div class="logo-box">
-            <div class="logo-icon">R</div>
-            <div style="font-weight: bold; font-size: 18px;">Redcoin <span style="color:var(--red)">RTC</span></div>
-        </div>
-        <i class="fa-solid fa-gear" style="color:#848e9c;" onclick="alert('Settings: Difficulty set to Strategy-05')"></i>
+        <div class="logo-box"><div class="logo-icon">R</div><div style="font-weight: bold; font-size: 18px;">Redcoin <span style="color:var(--red)">RTC</span></div></div>
+        <i class="fa-solid fa-gear" style="color:#848e9c;"></i>
     </div>
 
     <div class="card">
         <div style="color: #848e9c; font-size: 14px;">Estimated Balance</div>
-        <div class="balance" id="main-balance">500,000.00000000 RTC</div>
-        <div class="usd-val">≈ <span id="usd-value">$25,000.00</span> <span class="green">+2.45%</span></div>
+        <div class="balance" id="main-balance">Retrieving...</div>
+        <div class="usd-val">≈ <span id="usd-value">$0.00</span> <span style="color:var(--green); margin-left:5px;">+2.45%</span></div>
     </div>
 
     <div class="actions">
-        <button class="action-item" onclick="alert('Mining Status: Active\nRate: 0.00005 RTC/s\nStatus: High Scarcity Mode')">
-            <div class="icon-circle"><i class="fa-solid fa-microchip"></i></div>
-            <span>Mining</span>
-        </button>
-        <button class="action-item" onclick="alert('Transfer system is synchronizing with the new rate...')">
-            <div class="icon-circle active"><i class="fa-solid fa-paper-plane"></i></div>
-            <span>Send</span>
-        </button>
-        <button class="action-item" onclick="alert('Your Founder Deposit Address:\nRTC-FOUNDER-001')">
-            <div class="icon-circle"><i class="fa-solid fa-download"></i></div>
-            <span>Deposit</span>
-        </button>
-        <button class="action-item" onclick="if(confirm('Logout from Founder Session?')) location.reload();">
-            <div class="icon-circle"><i class="fa-solid fa-right-from-bracket"></i></div>
-            <span>Logout</span>
-        </button>
+        <button class="action-item" onclick="alert('Mining Speed: 0.00005/s')"><div class="icon-circle"><i class="fa-solid fa-microchip"></i></div><span>Mining</span></button>
+        <button class="action-item" onclick="alert('Syncing...')"><div class="icon-circle active"><i class="fa-solid fa-paper-plane"></i></div><span>Send</span></button>
+        <button class="action-item" onclick="alert('Address: RTC-FOUNDER-001')"><div class="icon-circle"><i class="fa-solid fa-download"></i></div><span>Deposit</span></button>
+        <button class="action-item" onclick="location.reload()"><div class="icon-circle"><i class="fa-solid fa-right-from-bracket"></i></div><span>Logout</span></button>
     </div>
 
     <div class="network-section">
         <div style="color: #848e9c; font-size: 13px; margin-bottom: 20px; font-weight: bold;">NETWORK STATUS</div>
-        <div class="stat-row">
-            <span>Hashrate</span>
-            <span id="hashrate">0.00 H/s</span>
-        </div>
-        <div class="stat-row">
-            <span>Status</span>
-            <span id="conn-status" class="green">Connected</span>
-        </div>
+        <div class="stat-row"><span>Hashrate</span><span id="hashrate">0.00 H/s</span></div>
+        <div class="stat-row"><span>Status</span><span style="color:var(--green)">Connected</span></div>
     </div>
 
     <script>
         const API_URL = "https://rtc-miner-server.onrender.com";
-        let currentBal = 0;
-        let lastServerTime = Date.now();
-        
-        // تعديل السرعة للوتيرة الاستراتيجية الجديدة
-        const RATE = 0.00005;
+        let serverBal = 0;
+        let lastSync = Date.now();
+        const RATE = 0.00005; 
 
         async function fetchData() {
             try {
                 const res = await fetch(`${API_URL}/founder_data?t=${Date.now()}`);
                 const data = await res.json();
-                if(data.balance !== undefined) {
-                    currentBal = parseFloat(data.balance);
-                    lastServerTime = Date.now();
-                    document.getElementById('hashrate').innerText = data.hashrate || "0.00 H/s";
+                if(data.balance) {
+                    serverBal = data.balance;
+                    lastSync = Date.now();
+                    document.getElementById('hashrate').innerText = data.hashrate;
                 }
-            } catch(e) { 
-                document.getElementById('conn-status').innerText = "Reconnecting...";
-                document.getElementById('conn-status').style.color = "#ffb100";
-            }
+            } catch(e) { console.log("Sync..."); }
         }
 
         function updateUI() {
-            if(currentBal > 0) {
-                const sec = (Date.now() - lastServerTime) / 1000;
-                const visualBal = currentBal + (RATE * sec);
+            if(serverBal > 0) {
+                // الحسبة البصرية: الرصيد القادم من السيرفر + (السرعة * الوقت المنقضي منذ آخر مزامنة)
+                const elapsed = (Date.now() - lastSync) / 1000;
+                const visualBal = serverBal + (RATE * elapsed);
                 
-                // تحديث الرصيد بـ 8 خانات عشرية
                 document.getElementById('main-balance').innerText = visualBal.toLocaleString(undefined, {
-                    minimumFractionDigits: 8, 
-                    maximumFractionDigits: 8
+                    minimumFractionDigits: 8, maximumFractionDigits: 8
                 }) + " RTC";
                 
-                // تحديث القيمة بالدولار (بناءً على سعر 0.05$)
-                const usd = (visualBal * 0.05).toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
+                document.getElementById('usd-value').innerText = "$" + (visualBal * 0.05).toLocaleString(undefined, {
+                    minimumFractionDigits: 2, maximumFractionDigits: 2
                 });
-                document.getElementById('usd-value').innerText = "$" + usd;
             }
             requestAnimationFrame(updateUI);
         }
 
-        // جلب البيانات كل 4 ثوانٍ لضمان الدقة
-        setInterval(fetchData, 4000);
+        setInterval(fetchData, 2000); // تحديث كل ثانيتين للمزامنة الدقيقة
         fetchData();
         updateUI();
     </script>
