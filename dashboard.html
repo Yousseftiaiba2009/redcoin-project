@@ -3,68 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redcoin RTC | Founder Control</title>
+    <title>Redcoin RTC | Founder Wallet</title>
     <style>
         :root { --red: #ff0000; --bg: #0b0e11; --card: #1e2329; --green: #0ecb81; }
         body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; text-align: center; }
         .header { padding: 25px; border-bottom: 1px solid #2b3139; background: var(--bg); }
         .card { background: var(--card); margin: 20px; padding: 40px 20px; border-radius: 20px; border-bottom: 5px solid var(--red); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .balance { font-size: 38px; font-weight: 800; margin: 15px 0; color: #fff; font-variant-numeric: tabular-nums; }
-        .usd { color: var(--green); font-size: 18px; margin-bottom: 10px; font-weight: bold; }
-        .status-box { display: inline-flex; align-items: center; gap: 8px; background: rgba(14, 203, 129, 0.1); padding: 5px 15px; border-radius: 20px; font-size: 12px; }
-        .dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; animation: blink 1.5s infinite; }
-        @keyframes blink { 0% { opacity: 0.3; } 50% { opacity: 1; } 100% { opacity: 0.3; } }
-        .btn { background: var(--red); color: white; border: none; padding: 15px 40px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .balance { font-size: 36px; font-weight: 800; margin: 15px 0; color: #fff; font-variant-numeric: tabular-nums; letter-spacing: 1px; }
+        .usd { color: var(--green); font-size: 18px; margin-bottom: 15px; font-weight: bold; }
+        .status-box { display: inline-flex; align-items: center; gap: 8px; background: rgba(14, 203, 129, 0.1); padding: 8px 20px; border-radius: 20px; font-size: 13px; }
+        .dot { width: 10px; height: 10px; background: var(--green); border-radius: 50%; box-shadow: 0 0 10px var(--green); animation: blink 1.5s infinite; }
+        @keyframes blink { 0% { opacity: 0.2; } 50% { opacity: 1; } 100% { opacity: 0.2; } }
+        .btn { background: var(--red); color: white; border: none; padding: 15px 40px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .btn:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
     <div class="header">
-        <h2 style="margin:0;">REDCOIN <span style="color:var(--red)">RTC</span></h2>
+        <h2 style="margin:0; letter-spacing: 3px;">REDCOIN <span style="color:var(--red)">RTC</span></h2>
     </div>
 
     <div class="card">
-        <div style="color: #848e9c; font-size: 14px; text-transform: uppercase;">Founder Official Balance</div>
-        <div class="balance" id="balance">0.0000 RTC</div>
+        <div style="color: #848e9c; font-size: 13px; text-transform: uppercase; font-weight: 600;">Founder Total Assets</div>
+        <div class="balance" id="balance">Retrieving...</div>
         <div class="usd" id="usd-value">$0.00 USD</div>
         
         <div class="status-box">
             <div class="dot"></div>
-            <span id="status-text">Network Synced: 0.0005/s</span>
+            <span id="status-text" style="color: var(--green);">Synchronizing with Node...</span>
         </div>
     </div>
 
-    <button class="btn" onclick="location.reload()">REFRESH WALLET</button>
+    <button class="btn" onclick="fetchFromServer()">SYNC NOW</button>
 
     <script>
         const API_URL = "https://rtc-miner-server.onrender.com";
         let currentBalance = 0;
         let lastServerTime = Date.now();
-        const MINING_RATE = 0.0005; // السرعة الجديدة التي اخترتها
+        const MINING_RATE = 0.0005; // السرعة الحالية المعتمدة
 
         async function fetchFromServer() {
             try {
+                // استخدام t= لضمان جلب الرصيد الحقيقي من السيرفر وتجاهل الذاكرة المؤقتة للمتصفح
                 const response = await fetch(`${API_URL}/founder_data?t=${Date.now()}`);
                 const data = await response.json();
+                
                 if(data.balance) {
                     currentBalance = parseFloat(data.balance);
                     lastServerTime = Date.now();
+                    document.getElementById('status-text').innerText = "Network Live: 0.0005/s";
                 }
             } catch (err) {
-                console.log("Syncing...");
+                document.getElementById('status-text').innerText = "Searching for Server...";
+                document.getElementById('status-text').style.color = "#ffb100";
             }
         }
 
         function smoothDisplay() {
             if(currentBalance > 0) {
+                // حساب الفرق الزمني وإضافة الزيادة بصرياً ليكون العداد انسيابياً
                 const elapsed = (Date.now() - lastServerTime) / 1000;
                 const visualBalance = currentBalance + (MINING_RATE * elapsed);
                 
-                // عرض 4 أرقام بعد الفاصلة لأن السرعة أصبحت دقيقة
                 document.getElementById('balance').innerText = visualBalance.toLocaleString(undefined, {
                     minimumFractionDigits: 4,
                     maximumFractionDigits: 4
                 }) + " RTC";
                 
+                // تحديث القيمة بالدولار (بناءً على سعر 0.05$)
                 document.getElementById('usd-value').innerText = "$" + (visualBalance * 0.05).toLocaleString(undefined, {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
@@ -73,7 +79,10 @@
             requestAnimationFrame(smoothDisplay);
         }
 
-        setInterval(fetchFromServer, 3000); // تحديث من السيرفر كل 3 ثوانٍ كافٍ جداً لهذه السرعة
+        // جلب البيانات من السيرفر كل 3 ثوانٍ لملاحقة التغييرات الحقيقية
+        setInterval(fetchFromServer, 3000);
+        
+        // التشغيل الفوري عند فتح الصفحة
         fetchFromServer();
         smoothDisplay();
     </script>
