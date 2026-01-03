@@ -9,13 +9,25 @@
         body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; text-align: center; }
         .header { padding: 25px; border-bottom: 1px solid #2b3139; background: var(--bg); }
         .card { background: var(--card); margin: 20px; padding: 40px 20px; border-radius: 20px; border-bottom: 5px solid var(--red); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .balance { font-size: 36px; font-weight: 800; margin: 15px 0; color: #fff; font-variant-numeric: tabular-nums; letter-spacing: 1px; }
-        .usd { color: var(--green); font-size: 18px; margin-bottom: 15px; font-weight: bold; }
+        .balance { font-size: 36px; font-weight: 800; margin: 10px 0; color: #fff; font-variant-numeric: tabular-nums; letter-spacing: 1px; }
+        .usd { color: var(--green); font-size: 18px; margin-bottom: 10px; font-weight: bold; }
+        
+        /* تصميم خانة أرباح الجلسة الجديدة */
+        .session-box { 
+            background: rgba(255, 177, 0, 0.1); 
+            border: 1px solid rgba(255, 177, 0, 0.2);
+            border-radius: 12px; 
+            padding: 15px; 
+            margin: 15px auto;
+            max-width: 280px;
+        }
+        .session-label { color: #848e9c; font-size: 11px; text-transform: uppercase; margin-bottom: 5px; }
+        .session-value { color: #ffb100; font-weight: bold; font-size: 20px; }
+
         .status-box { display: inline-flex; align-items: center; gap: 8px; background: rgba(14, 203, 129, 0.1); padding: 8px 20px; border-radius: 20px; font-size: 13px; }
         .dot { width: 10px; height: 10px; background: var(--green); border-radius: 50%; box-shadow: 0 0 10px var(--green); animation: blink 1.5s infinite; }
         @keyframes blink { 0% { opacity: 0.2; } 50% { opacity: 1; } 100% { opacity: 0.2; } }
         .btn { background: var(--red); color: white; border: none; padding: 15px 40px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
-        .btn:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
@@ -28,61 +40,66 @@
         <div class="balance" id="balance">Retrieving...</div>
         <div class="usd" id="usd-value">$0.00 USD</div>
         
+        <div class="session-box">
+            <div class="session-label">Mined Since Server Startup</div>
+            <div class="session-value" id="session-profit">0.000000 RTC</div>
+        </div>
+
         <div class="status-box">
             <div class="dot"></div>
             <span id="status-text" style="color: var(--green);">Synchronizing with Node...</span>
         </div>
     </div>
 
-    <button class="btn" onclick="fetchFromServer()">SYNC NOW</button>
+    <button class="btn" onclick="fetchFromServer()">FORCE SYNC</button>
 
     <script>
         const API_URL = "https://rtc-miner-server.onrender.com";
         let currentBalance = 0;
+        let sessionProfit = 0;
         let lastServerTime = Date.now();
-        const MINING_RATE = 0.0005; // السرعة الحالية المعتمدة
+        const MINING_RATE = 0.0005;
 
         async function fetchFromServer() {
             try {
-                // استخدام t= لضمان جلب الرصيد الحقيقي من السيرفر وتجاهل الذاكرة المؤقتة للمتصفح
                 const response = await fetch(`${API_URL}/founder_data?t=${Date.now()}`);
                 const data = await response.json();
                 
-                if(data.balance) {
+                if(data.balance !== undefined) {
                     currentBalance = parseFloat(data.balance);
+                    sessionProfit = parseFloat(data.session_profit || 0);
                     lastServerTime = Date.now();
                     document.getElementById('status-text').innerText = "Network Live: 0.0005/s";
                 }
             } catch (err) {
-                document.getElementById('status-text').innerText = "Searching for Server...";
+                document.getElementById('status-text').innerText = "Reconnecting...";
                 document.getElementById('status-text').style.color = "#ffb100";
             }
         }
 
         function smoothDisplay() {
             if(currentBalance > 0) {
-                // حساب الفرق الزمني وإضافة الزيادة بصرياً ليكون العداد انسيابياً
                 const elapsed = (Date.now() - lastServerTime) / 1000;
-                const visualBalance = currentBalance + (MINING_RATE * elapsed);
                 
+                // تحديث الرصيد الإجمالي بصرياً
+                const visualBalance = currentBalance + (MINING_RATE * elapsed);
                 document.getElementById('balance').innerText = visualBalance.toLocaleString(undefined, {
-                    minimumFractionDigits: 4,
-                    maximumFractionDigits: 4
+                    minimumFractionDigits: 4, maximumFractionDigits: 4
                 }) + " RTC";
                 
-                // تحديث القيمة بالدولار (بناءً على سعر 0.05$)
+                // تحديث أرباح الجلسة بصرياً
+                const visualSession = sessionProfit + (MINING_RATE * elapsed);
+                document.getElementById('session-profit').innerText = "+" + visualSession.toFixed(6) + " RTC";
+                
+                // تحديث القيمة بالدولار
                 document.getElementById('usd-value').innerText = "$" + (visualBalance * 0.05).toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
+                    minimumFractionDigits: 2, maximumFractionDigits: 2
                 }) + " USD";
             }
             requestAnimationFrame(smoothDisplay);
         }
 
-        // جلب البيانات من السيرفر كل 3 ثوانٍ لملاحقة التغييرات الحقيقية
         setInterval(fetchFromServer, 3000);
-        
-        // التشغيل الفوري عند فتح الصفحة
         fetchFromServer();
         smoothDisplay();
     </script>
