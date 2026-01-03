@@ -1,65 +1,53 @@
-<script>
-    const API_URL = "https://rtc-miner-server.onrender.com";
-    let localBalance = 0;
-    let serverMiningSpeed = 0.05; // السرعة المتفق عليها في السيرفر
-    let syncInterval;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redcoin RTC | Founder Wallet</title>
+    <style>
+        :root { --red: #ff0000; --bg: #0b0e11; --card: #1e2329; }
+        body { background: var(--bg); color: white; font-family: sans-serif; margin: 0; text-align: center; }
+        .header { padding: 20px; border-bottom: 1px solid #2b3139; background: var(--bg); }
+        .card { background: var(--card); margin: 20px; padding: 30px; border-radius: 15px; border-bottom: 4px solid var(--red); }
+        .balance { font-size: 32px; font-weight: bold; margin: 10px 0; color: #fff; }
+        .status { font-size: 12px; color: #0ecb81; }
+        .btn { background: var(--red); color: white; border: none; padding: 15px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>REDCOIN <span style="color:var(--red)">RTC</span></h2>
+    </div>
 
-    window.addEventListener('DOMContentLoaded', () => {
-        const savedName = localStorage.getItem('rtc_user') || 'Founder';
-        document.getElementById('display-username').innerText = `@${savedName.toLowerCase()}`;
-        document.getElementById('user-initial').innerText = savedName.charAt(0).toUpperCase();
-        
-        // جلب أول بيانات من السيرفر
-        fetchInitialData();
-        
-        // المزامنة الدورية مع السيرفر (كل 5 ثوانٍ لتأكيد الرقم النهائي)
-        setInterval(fetchInitialData, 5000);
-        
-        // تحديث الواجهة بصرياً كل 100 ملي ثانية لضمان سلاسة العداد
-        setInterval(updateUI, 100);
-    });
+    <div class="card">
+        <div style="color: #848e9c; font-size: 14px;">Founder Balance</div>
+        <div class="balance" id="balance">0.0000 RTC</div>
+        <div id="status" class="status">Connecting to Node...</div>
+    </div>
 
-    async function fetchInitialData() {
-        try {
-            // استخدام Cache Busting لضمان عدم جلب بيانات قديمة
-            const response = await fetch(`${API_URL}/founder_data?cache=${Date.now()}`);
-            const data = await response.json();
-            
-            if(data.balance) {
-                // تحديث الرصيد المحلي ليتطابق مع "الحقيقة" في السيرفر
-                localBalance = parseFloat(data.balance);
-                
-                document.getElementById('txt-conn').innerText = "Mainnet Synced";
-                document.getElementById('txt-conn').style.color = "#0ecb81";
-                document.getElementById('hash-rate').innerText = "Turbo (0.05/s)";
+    <button class="btn" onclick="location.reload()">Refresh Network</button>
+
+    <script>
+        const API_URL = "https://rtc-miner-server.onrender.com";
+        const FOUNDER_ID = "7058513615"; // معرفك من الصورة
+
+        async function updateWallet() {
+            try {
+                const response = await fetch(`${API_URL}/founder_data?t=${Date.now()}`);
+                const data = await response.json();
+                if(data.balance) {
+                    document.getElementById('balance').innerText = parseFloat(data.balance).toLocaleString(undefined, {minimumFractionDigits: 4}) + " RTC";
+                    document.getElementById('status').innerText = "● Mainnet Live (Turbo 0.5/s)";
+                    document.getElementById('status').style.color = "#0ecb81";
+                }
+            } catch (err) {
+                document.getElementById('status').innerText = "○ Syncing with Server...";
+                document.getElementById('status').style.color = "#ffb100";
             }
-        } catch (error) {
-            document.getElementById('txt-conn').innerText = "Connecting...";
-            document.getElementById('txt-conn').style.color = "#ffb100";
         }
-    }
 
-    function updateUI() {
-        if (localBalance > 0) {
-            // إضافة الزيادة الطفيفة بصرياً (0.05 تقسيم 10 لأننا نحدث 10 مرات في الثانية)
-            localBalance += (serverMiningSpeed / 10);
-            
-            const balanceElement = document.getElementById('db-balance');
-            balanceElement.innerText = localBalance.toLocaleString(undefined, {
-                minimumFractionDigits: 4,
-                maximumFractionDigits: 4
-            }) + " RTC";
-            
-            // تحديث القيمة التقريبية بالدولار
-            document.getElementById('usd-val').innerText = (localBalance * 0.05).toLocaleString();
-        }
-    }
-
-    function startMining() {
-        // تنبيه المؤسس بأن النظام يعمل بالفعل في الخلفية (Cloud)
-        alert("Cloud Mining is active 24/7. Your balance is safe on the blockchain.");
-    }
-
-    function openModal(id) { document.getElementById(id).style.display = 'block'; }
-    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-</script>
+        setInterval(updateWallet, 1000);
+        updateWallet();
+    </script>
+</body>
+</html>
