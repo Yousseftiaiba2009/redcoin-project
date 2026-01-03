@@ -1,177 +1,115 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>محفظة Redcoin RTC</title>
+    <title>Redcoin RTC | Official Wallet</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { 
-            --primary: #ff0000; 
-            --dark-bg: #0b0e11; 
-            --card-bg: #1e2329; 
-            --text-gray: #848e9c;
-            --success: #0ecb81;
-            --gold: #f0b90b;
-        }
+        :root { --red: #ff0000; --bg: #0b0e11; --card: #1e2329; --green: #0ecb81; }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
         
-        body { 
-            background: var(--dark-bg); 
-            color: white; 
-            font-family: 'Segoe UI', Tahoma, sans-serif; 
-            margin: 0; 
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        /* Header */
+        .header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .logo-box { display: flex; align-items: center; gap: 10px; }
+        .logo-icon { background: var(--red); color: white; padding: 5px 10px; border-radius: 5px; font-weight: bold; }
+        .settings-icon { color: #848e9c; font-size: 20px; }
+
+        /* Balance Card */
+        .card { 
+            background: var(--card); 
+            margin: 20px; 
+            padding: 30px 20px; 
+            border-radius: 15px; 
+            border-bottom: 2px solid var(--red);
+            text-align: left;
         }
+        .est-label { color: #848e9c; font-size: 14px; margin-bottom: 10px; }
+        .balance { font-size: 32px; font-weight: bold; margin: 5px 0; letter-spacing: 0.5px; }
+        .usd-val { color: #848e9c; font-size: 18px; }
+        .percent { color: var(--green); font-size: 16px; margin-left: 5px; }
 
-        /* رأس الصفحة */
-        .app-bar {
-            width: 100%;
-            max-width: 500px;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-sizing: border-box;
+        /* Circular Action Buttons */
+        .actions { display: flex; justify-content: space-around; margin: 30px 10px; }
+        .action-item { display: flex; flex-direction: column; align-items: center; gap: 10px; text-decoration: none; color: white; cursor: pointer; }
+        .icon-circle { 
+            width: 55px; height: 55px; 
+            background: #2b3139; 
+            border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 20px; transition: 0.3s;
         }
+        .icon-circle.active { color: var(--red); }
+        .action-item span { font-size: 12px; color: #848e9c; }
+        .icon-circle:hover { background: #3e454d; }
 
-        .logo { font-weight: bold; font-size: 1.2rem; letter-spacing: 1px; }
-        .logo span { color: var(--primary); }
+        /* Network Status Section */
+        .network-section { margin: 0 25px; text-align: left; }
+        .section-title { color: #848e9c; font-size: 14px; font-weight: bold; text-transform: uppercase; margin-bottom: 20px; }
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 16px; }
+        .stat-label { color: white; }
+        .stat-value { color: #fff; }
+        .stat-value.green { color: var(--green); }
 
-        /* بطاقة الرصيد الرئيسية */
-        .wallet-card {
-            width: 90%;
-            max-width: 400px;
-            background: linear-gradient(135deg, #1e2329 0%, #2b3139 100%);
-            border-radius: 24px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-            margin-top: 10px;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid #333;
+        /* Session Profit Box (إضافة جديدة للمراقبة) */
+        .session-box {
+            background: rgba(255, 0, 0, 0.05);
+            margin: 20px; padding: 15px; border-radius: 10px;
+            display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid rgba(255, 0, 0, 0.1);
         }
-
-        .wallet-card::before {
-            content: ''; position: absolute; top: -50%; right: -50%;
-            width: 200px; height: 200px; background: rgba(255, 0, 0, 0.05);
-            border-radius: 50%; z-index: 0;
-        }
-
-        .label { color: var(--text-gray); font-size: 0.9rem; margin-bottom: 8px; z-index: 1; position: relative; }
-        .balance-main { font-size: 2.2rem; font-weight: bold; margin-bottom: 5px; z-index: 1; position: relative; }
-        .balance-usd { color: var(--success); font-weight: 600; font-size: 1.1rem; z-index: 1; position: relative; }
-
-        /* أزرار الإجراءات السريعة */
-        .actions {
-            display: flex;
-            gap: 15px;
-            margin-top: 25px;
-            width: 90%;
-            max-width: 400px;
-        }
-
-        .action-btn {
-            flex: 1;
-            background: var(--card-bg);
-            border: 1px solid #333;
-            padding: 12px;
-            border-radius: 12px;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .action-btn i { font-size: 1.2rem; color: var(--primary); }
-        .action-btn:hover { background: #2b3139; transform: translateY(-2px); }
-
-        /* قسم إحصائيات التعدين */
-        .stats-section {
-            width: 90%;
-            max-width: 400px;
-            margin-top: 30px;
-            text-align: right;
-        }
-
-        .section-title { font-size: 1rem; font-weight: bold; margin-bottom: 15px; color: var(--text-gray); }
-
-        .stat-item {
-            background: var(--card-bg);
-            padding: 15px;
-            border-radius: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .stat-info { display: flex; align-items: center; gap: 10px; }
-        .stat-icon { width: 35px; height: 35px; background: rgba(240, 185, 11, 0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--gold); }
-        .stat-label { font-size: 0.85rem; color: var(--text-gray); }
-        .stat-value { font-weight: bold; font-size: 0.95rem; }
-
-        /* مؤشر الحالة */
-        .status-badge {
-            margin-top: 20px;
-            font-size: 0.75rem;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            color: var(--success);
-        }
-        .dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; box-shadow: 0 0 8px var(--success); }
-
     </style>
 </head>
 <body>
 
-    <div class="app-bar">
-        <div class="logo">REDCOIN <span>RTC</span></div>
-        <i class="fa-regular fa-bell"></i>
+    <div class="header">
+        <div class="logo-box">
+            <div class="logo-icon">R</div>
+            <div style="font-weight: bold; font-size: 18px;">Redcoin <span style="color:var(--red)">RTC</span></div>
+        </div>
+        <i class="fa-solid fa-gear settings-icon"></i>
     </div>
 
-    <div class="wallet-card">
-        <div class="label">إجمالي الرصيد</div>
-        <div class="balance-main" id="main-balance">0.0000</div>
-        <div class="balance-usd" id="usd-balance">≈ $0.00</div>
+    <div class="card">
+        <div class="est-label">Estimated Balance</div>
+        <div class="balance" id="main-balance">500,000.0000 RTC</div>
+        <div class="usd-val">≈ <span id="usd-value">$25,000</span> <span class="percent">+2.45%</span></div>
     </div>
 
     <div class="actions">
-        <div class="action-btn"><i class="fa-solid fa-arrow-up"></i><span>إرسال</span></div>
-        <div class="action-btn"><i class="fa-solid fa-arrow-down"></i><span>استلام</span></div>
-        <div class="action-btn" onclick="fetchData()"><i class="fa-solid fa-rotate"></i><span>تحديث</span></div>
-    </div>
-
-    <div class="stats-section">
-        <div class="section-title">إحصائيات التعدين السحابي</div>
-        
-        <div class="stat-item">
-            <div class="stat-info">
-                <div class="stat-icon"><i class="fa-solid fa-bolt"></i></div>
-                <div class="stat-label">أرباح الجلسة الحالية</div>
-            </div>
-            <div class="stat-value" id="session-val" style="color: var(--gold);">+0.0000</div>
+        <div class="action-item">
+            <div class="icon-circle"><i class="fa-solid fa-microchip"></i></div>
+            <span>Mining</span>
         </div>
-
-        <div class="stat-item">
-            <div class="stat-info">
-                <div class="stat-icon"><i class="fa-solid fa-gauge-high"></i></div>
-                <div class="stat-label">سرعة الشبكة</div>
-            </div>
-            <div class="stat-value">0.0005 RTC/s</div>
+        <div class="action-item">
+            <div class="icon-circle active"><i class="fa-solid fa-paper-plane"></i></div>
+            <span>Send</span>
+        </div>
+        <div class="action-item">
+            <div class="icon-circle"><i class="fa-solid fa-download"></i></div>
+            <span>Deposit</span>
+        </div>
+        <div class="action-item" onclick="location.reload()">
+            <div class="icon-circle"><i class="fa-solid fa-right-from-bracket"></i></div>
+            <span>Logout</span>
         </div>
     </div>
 
-    <div class="status-badge">
-        <div class="dot"></div>
-        <span>متصل بالشبكة الرئيسية (Mainnet)</span>
+    <div class="session-box">
+        <span style="color:#848e9c; font-size: 12px;">Session Profit</span>
+        <span id="session-profit" style="color:var(--green); font-weight: bold;">+0.000000</span>
+    </div>
+
+    <div class="network-section">
+        <div class="section-title">Network Status</div>
+        <div class="stat-row">
+            <span class="stat-label">Hashrate</span>
+            <span class="stat-value">0.00 H/s</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">Status</span>
+            <span class="stat-value green">Connected</span>
+        </div>
     </div>
 
     <script>
@@ -179,7 +117,7 @@
         let currentBal = 0;
         let sessionProf = 0;
         let lastUpdate = Date.now();
-        const RATE = 0.0005;
+        const RATE = 0.0005; // السرعة التي طلبتها
 
         async function fetchData() {
             try {
@@ -190,7 +128,7 @@
                     sessionProf = data.session_profit;
                     lastUpdate = Date.now();
                 }
-            } catch(e) { console.log("خطأ في الاتصال"); }
+            } catch(e) { console.log("Sync error"); }
         }
 
         function updateUI() {
@@ -200,13 +138,16 @@
                 const visualSess = sessionProf + (RATE * sec);
                 
                 document.getElementById('main-balance').innerText = visualBal.toLocaleString(undefined, {minimumFractionDigits: 4, maximumFractionDigits: 4}) + " RTC";
-                document.getElementById('session-val').innerText = "+" + visualSess.toFixed(6);
-                document.getElementById('usd-balance').innerText = "≈ $" + (visualBal * 0.05).toLocaleString(undefined, {minimumFractionDigits: 2});
+                document.getElementById('session-profit').innerText = "+" + visualSess.toFixed(6);
+                
+                // تحديث القيمة التقريبية بالدولار
+                const usd = (visualBal * 0.05).toLocaleString();
+                document.getElementById('usd-value').innerText = "$" + usd;
             }
             requestAnimationFrame(updateUI);
         }
 
-        setInterval(fetchData, 4000);
+        setInterval(fetchData, 3000);
         fetchData();
         updateUI();
     </script>
