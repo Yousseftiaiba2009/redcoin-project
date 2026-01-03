@@ -8,58 +8,70 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-# --- إعدادات مركز القيادة ---
+# --- إعدادات قاعدة البيانات ---
 WALLETS_FILE = "wallets_db.json"
 FOUNDER_ADDR = "RTC-FOUNDER-001"
-MINING_SPEED = 0.0005  # السرعة القديمة الرصينة (تعدين صعب)
 
-# متغير لحساب ما تم جنيه منذ تشغيل السيرفر الحالي
-START_SESSION_BALANCE = 0.0
+# السرعة التي اعتمدناها (0.0005) لضمان صعوبة التعدين وندرة العملة
+MINING_SPEED = 0.0005 
+
+# متغيرات الجلسة لمراقبة الأداء منذ التشغيل
+start_time = time.time()
+session_start_balance = 0.0
 
 def load_balance():
+    """تحميل الرصيد من الملف أو البدء برصيد المؤسس"""
     if os.path.exists(WALLETS_FILE):
         try:
             with open(WALLETS_FILE, 'r') as f:
                 data = json.load(f)
                 if FOUNDER_ADDR in data:
                     return float(data[FOUNDER_ADDR]['balance'])
-        except: pass
-    return 500000.0 # الرصيد التأسيسي للمؤسس
+        except:
+            pass
+    return 500000.0
 
-# تهيئة البيانات عند انطلاق السيرفر
+# تهيئة الرصيد
 initial_balance = load_balance()
-START_SESSION_BALANCE = initial_balance
+session_start_balance = initial_balance
 wallets = {FOUNDER_ADDR: {"balance": initial_balance}}
 
 def save_data():
+    """حفظ البيانات في ملف JSON"""
     try:
         with open(WALLETS_FILE, 'w') as f:
             json.dump(wallets, f)
-    except: pass
+    except:
+        pass
 
-def mining_worker():
+def mining_loop():
+    """المحرك الرئيسي لعملية التعدين"""
     global wallets
     while True:
-        # عملية التعدين المستمرة
+        # إضافة الزيادة الدقيقة للرصيد
         wallets[FOUNDER_ADDR]["balance"] += MINING_SPEED
         
-        # حفظ البيانات في ملف JSON كل 15 ثانية صمتاً
-        if int(time.time()) % 15 == 0:
+        # حفظ تلقائي كل 20 ثانية لضمان استقرار السيرفر
+        if int(time.time()) % 20 == 0:
             save_data()
+            
         time.sleep(1)
 
-# تشغيل خيط التعدين في الخلفية
-threading.Thread(target=mining_worker, daemon=True).start()
+# تشغيل التعدين في خلفية السيرفر
+threading.Thread(target=mining_loop, daemon=True).start()
 
 @app.route('/founder_data')
-def founder_data():
-    current_bal = wallets[FOUNDER_ADDR]['balance']
+def get_founder_data():
+    """نقطة النهاية (API) التي تغذي الداشبورد بالبيانات"""
+    current_balance = wallets[FOUNDER_ADDR]['balance']
     return jsonify({
-        "balance": round(current_bal, 6),
-        "session_profit": round(current_bal - START_SESSION_BALANCE, 6),
-        "status": "online"
+        "balance": round(current_balance, 6),
+        "session_profit": round(current_balance - session_start_balance, 6),
+        "hashrate": "0.00 H/s",  # تظهر في الواجهة كما في الصورة
+        "status": "Connected",   # حالة الاتصال للواجهة
+        "uptime": int(time.time() - start_time)
     })
 
 if __name__ == "__main__":
-    # تشغيل السيرفر على البورت المخصص لـ Render
+    # التشغيل على المنفذ الافتراضي لخدمات الاستضافة السحابية
     app.run(host='0.0.0.0', port=10000)
