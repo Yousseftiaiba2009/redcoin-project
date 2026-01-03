@@ -13,7 +13,7 @@ WALLETS_FILE = "wallets_db.json"
 FOUNDER_ADDR = "RTC-FOUNDER-001"
 
 # السرعة الاستراتيجية الجديدة (ندرة عالية جداً)
-MINING_SPEED = 0.00005 
+MINING_SPEED = 0.00000005 
 
 # متغيرات الجلسة لمراقبة الأداء
 start_time = time.time()
