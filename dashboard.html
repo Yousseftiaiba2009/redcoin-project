@@ -23,13 +23,14 @@
             border-bottom: 2px solid var(--red);
             text-align: left;
         }
-        .balance { font-size: 28px; font-weight: bold; margin: 10px 0; font-variant-numeric: tabular-nums; }
+        /* تحسين عرض الأرقام لمنع الاهتزاز */
+        .balance { font-size: 26px; font-weight: bold; margin: 10px 0; font-variant-numeric: tabular-nums; white-space: nowrap; }
         .usd-val { color: #848e9c; font-size: 16px; font-weight: 600; }
         .green { color: var(--green); margin-left: 5px; }
 
         /* Buttons */
         .actions { display: flex; justify-content: space-around; margin: 30px 10px; }
-        .action-item { display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; border: none; background: none; color: white; }
+        .action-item { display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; border: none; background: none; color: white; transition: 0.2s; }
         .icon-circle { 
             width: 55px; height: 55px; 
             background: #2b3139; 
@@ -39,7 +40,7 @@
         }
         .icon-circle.active { color: var(--red); border: 1px solid var(--red); }
         .action-item span { font-size: 12px; color: #848e9c; }
-        .action-item:active .icon-circle { transform: scale(0.9); }
+        .action-item:active { transform: scale(0.9); }
 
         /* Stats */
         .network-section { margin: 0 25px; text-align: left; }
@@ -53,29 +54,29 @@
             <div class="logo-icon">R</div>
             <div style="font-weight: bold; font-size: 18px;">Redcoin <span style="color:var(--red)">RTC</span></div>
         </div>
-        <i class="fa-solid fa-gear" style="color:#848e9c;"></i>
+        <i class="fa-solid fa-gear" style="color:#848e9c;" onclick="alert('Settings: Difficulty set to Strategy-05')"></i>
     </div>
 
     <div class="card">
         <div style="color: #848e9c; font-size: 14px;">Estimated Balance</div>
         <div class="balance" id="main-balance">500,000.00000000 RTC</div>
-        <div class="usd-val">≈ <span id="usd-value">$25,000</span> <span class="green">+2.45%</span></div>
+        <div class="usd-val">≈ <span id="usd-value">$25,000.00</span> <span class="green">+2.45%</span></div>
     </div>
 
     <div class="actions">
-        <button class="action-item" onclick="alert('Mining is active at 0.0005/s')">
+        <button class="action-item" onclick="alert('Mining Status: Active\nRate: 0.00005 RTC/s\nStatus: High Scarcity Mode')">
             <div class="icon-circle"><i class="fa-solid fa-microchip"></i></div>
             <span>Mining</span>
         </button>
-        <button class="action-item" onclick="alert('Network processing...')">
+        <button class="action-item" onclick="alert('Transfer system is synchronizing with the new rate...')">
             <div class="icon-circle active"><i class="fa-solid fa-paper-plane"></i></div>
             <span>Send</span>
         </button>
-        <button class="action-item" onclick="alert('Your address: RTC-FOUNDER-001')">
+        <button class="action-item" onclick="alert('Your Founder Deposit Address:\nRTC-FOUNDER-001')">
             <div class="icon-circle"><i class="fa-solid fa-download"></i></div>
             <span>Deposit</span>
         </button>
-        <button class="action-item" onclick="location.reload()">
+        <button class="action-item" onclick="if(confirm('Logout from Founder Session?')) location.reload();">
             <div class="icon-circle"><i class="fa-solid fa-right-from-bracket"></i></div>
             <span>Logout</span>
         </button>
@@ -85,11 +86,11 @@
         <div style="color: #848e9c; font-size: 13px; margin-bottom: 20px; font-weight: bold;">NETWORK STATUS</div>
         <div class="stat-row">
             <span>Hashrate</span>
-            <span>0.00 H/s</span>
+            <span id="hashrate">0.00 H/s</span>
         </div>
         <div class="stat-row">
             <span>Status</span>
-            <span class="green">Connected</span>
+            <span id="conn-status" class="green">Connected</span>
         </div>
     </div>
 
@@ -97,17 +98,23 @@
         const API_URL = "https://rtc-miner-server.onrender.com";
         let currentBal = 0;
         let lastServerTime = Date.now();
-        const RATE = 0.0005;
+        
+        // تعديل السرعة للوتيرة الاستراتيجية الجديدة
+        const RATE = 0.00005;
 
         async function fetchData() {
             try {
                 const res = await fetch(`${API_URL}/founder_data?t=${Date.now()}`);
                 const data = await res.json();
-                if(data.balance) {
+                if(data.balance !== undefined) {
                     currentBal = parseFloat(data.balance);
                     lastServerTime = Date.now();
+                    document.getElementById('hashrate').innerText = data.hashrate || "0.00 H/s";
                 }
-            } catch(e) { console.log("Reconnecting..."); }
+            } catch(e) { 
+                document.getElementById('conn-status').innerText = "Reconnecting...";
+                document.getElementById('conn-status').style.color = "#ffb100";
+            }
         }
 
         function updateUI() {
@@ -115,12 +122,13 @@
                 const sec = (Date.now() - lastServerTime) / 1000;
                 const visualBal = currentBal + (RATE * sec);
                 
-                // عرض 8 أرقام عشرية بدقة تامة
+                // تحديث الرصيد بـ 8 خانات عشرية
                 document.getElementById('main-balance').innerText = visualBal.toLocaleString(undefined, {
                     minimumFractionDigits: 8, 
                     maximumFractionDigits: 8
                 }) + " RTC";
                 
+                // تحديث القيمة بالدولار (بناءً على سعر 0.05$)
                 const usd = (visualBal * 0.05).toLocaleString(undefined, {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
@@ -130,6 +138,7 @@
             requestAnimationFrame(updateUI);
         }
 
+        // جلب البيانات كل 4 ثوانٍ لضمان الدقة
         setInterval(fetchData, 4000);
         fetchData();
         updateUI();
