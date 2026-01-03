@@ -12,15 +12,15 @@ CORS(app)
 WALLETS_FILE = "wallets_db.json"
 FOUNDER_ADDR = "RTC-FOUNDER-001"
 
-# السرعة التي اعتمدناها (0.0005) لضمان صعوبة التعدين وندرة العملة
+# السرعة الاستراتيجية الجديدة (ندرة عالية جداً)
 MINING_SPEED = 0.00005 
 
-# متغيرات الجلسة لمراقبة الأداء منذ التشغيل
+# متغيرات الجلسة لمراقبة الأداء
 start_time = time.time()
 session_start_balance = 0.0
 
 def load_balance():
-    """تحميل الرصيد من الملف أو البدء برصيد المؤسس"""
+    """تحميل الرصيد مع ضمان قراءة القيمة العشرية بدقة"""
     if os.path.exists(WALLETS_FILE):
         try:
             with open(WALLETS_FILE, 'r') as f:
@@ -31,13 +31,13 @@ def load_balance():
             pass
     return 500000.0
 
-# تهيئة الرصيد
+# تهيئة الرصيد عند التشغيل
 initial_balance = load_balance()
 session_start_balance = initial_balance
 wallets = {FOUNDER_ADDR: {"balance": initial_balance}}
 
 def save_data():
-    """حفظ البيانات في ملف JSON"""
+    """حفظ البيانات بدقة عالية في ملف JSON"""
     try:
         with open(WALLETS_FILE, 'w') as f:
             json.dump(wallets, f)
@@ -45,33 +45,34 @@ def save_data():
         pass
 
 def mining_loop():
-    """المحرك الرئيسي لعملية التعدين"""
+    """محرك التعدين بالسرعة الجديدة"""
     global wallets
     while True:
-        # إضافة الزيادة الدقيقة للرصيد
+        # إضافة الزيادة بالدقة المطلوبة
         wallets[FOUNDER_ADDR]["balance"] += MINING_SPEED
         
-        # حفظ تلقائي كل 20 ثانية لضمان استقرار السيرفر
+        # حفظ البيانات كل 20 ثانية لضمان استقرار السيرفر ومواكبة التغيرات
         if int(time.time()) % 20 == 0:
             save_data()
             
         time.sleep(1)
 
-# تشغيل التعدين في خلفية السيرفر
+# إطلاق محرك التعدين في الخلفية
 threading.Thread(target=mining_loop, daemon=True).start()
 
 @app.route('/founder_data')
 def get_founder_data():
-    """نقطة النهاية (API) التي تغذي الداشبورد بالبيانات"""
+    """تصدير البيانات بدقة 8 خانات عشرية"""
     current_balance = wallets[FOUNDER_ADDR]['balance']
+    # تم تغيير round إلى 8 ليتوافق مع واجهة الداشبورد الجديدة
     return jsonify({
-        "balance": round(current_balance, 6),
-        "session_profit": round(current_balance - session_start_balance, 6),
-        "hashrate": "0.00 H/s",  # تظهر في الواجهة كما في الصورة
-        "status": "Connected",   # حالة الاتصال للواجهة
+        "balance": round(current_balance, 8),
+        "session_profit": round(current_balance - session_start_balance, 8),
+        "hashrate": "0.00 H/s",
+        "status": "Connected",
         "uptime": int(time.time() - start_time)
     })
 
 if __name__ == "__main__":
-    # التشغيل على المنفذ الافتراضي لخدمات الاستضافة السحابية
+    # التشغيل على بورت Render الافتراضي
     app.run(host='0.0.0.0', port=10000)
