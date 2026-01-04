@@ -10,8 +10,6 @@ CORS(app)
 
 WALLETS_FILE = "wallets_db.json"
 FOUNDER_ADDR = "RTC-FOUNDER-001"
-
-# السرعة المعتمدة الرسمية (0.00005 عملة في الثانية)
 MINING_SPEED = 0.00005 
 
 start_time = time.time()
@@ -23,7 +21,8 @@ def load_balance():
                 data = json.load(f)
                 return float(data[FOUNDER_ADDR]['balance'])
         except: pass
-    return 500000.0
+    # تم تثبيت الرقم الجديد بناءً على طلبك
+    return 793485.0 
 
 initial_balance = load_balance()
 session_start_balance = initial_balance
@@ -39,7 +38,7 @@ def mining_loop():
     global wallets
     while True:
         wallets[FOUNDER_ADDR]["balance"] += MINING_SPEED
-        if int(time.time()) % 10 == 0: # حفظ كل 10 ثوانٍ للأمان
+        if int(time.time()) % 15 == 0:
             save_data()
         time.sleep(1)
 
@@ -49,11 +48,10 @@ threading.Thread(target=mining_loop, daemon=True).start()
 def get_founder_data():
     current_balance = wallets[FOUNDER_ADDR]['balance']
     return jsonify({
-        # إرسال الرقم الخام بدقة عالية جداً
         "balance": float(f"{current_balance:.8f}"),
         "session_profit": float(f"{(current_balance - session_start_balance):.8f}"),
         "hashrate": "0.00 H/s",
-        "status": "Connected"
+        "status": "Secure-Mining"
     })
 
 if __name__ == "__main__":
