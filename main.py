@@ -10,24 +10,21 @@ CORS(app)
 
 WALLETS_FILE = "wallets_db.json"
 FOUNDER_ADDR = "RTC-FOUNDER-001"
-
-# العودة للسرعة القديمة لزيادة الصعوبة (ندرة العملة)
-MINING_SPEED = 0.0005 
+# السرعة المعتمدة
+MINING_SPEED = 0.00005 
 
 def load_balance():
     if os.path.exists(WALLETS_FILE):
         try:
             with open(WALLETS_FILE, 'r') as f:
                 data = json.load(f)
-                if FOUNDER_ADDR in data:
-                    # نضمن استعادة رصيدك الضخم الذي جمعته سابقاً
-                    return float(data[FOUNDER_ADDR]['balance'])
+                return float(data[FOUNDER_ADDR]['balance'])
         except: pass
-    return 500000.0
+    # رقمك المعتمد
+    return 793485.0
 
-initial_val = load_balance()
-START_BALANCE = initial_val # لتتبع ما جنيته منذ تشغيل السيرفر الحالي
-wallets = {FOUNDER_ADDR: {"balance": initial_val}}
+# تهيئة الرصيد في الذاكرة
+wallets = {FOUNDER_ADDR: {"balance": load_balance()}}
 
 def save_data():
     try:
@@ -35,26 +32,28 @@ def save_data():
             json.dump(wallets, f)
     except: pass
 
-def mining_worker():
-    global wallets
+def mining_loop():
     while True:
         wallets[FOUNDER_ADDR]["balance"] += MINING_SPEED
-        # حفظ كل 10 ثوانٍ لضمان الأمان
-        if int(time.time()) % 10 == 0:
+        if int(time.time()) % 15 == 0:
             save_data()
         time.sleep(1)
 
-threading.Thread(target=mining_worker, daemon=True).start()
+# تشغيل التعدين في الخلفية
+threading.Thread(target=mining_loop, daemon=True).start()
+
+@app.route('/')
+def home():
+    return "RTC Server is Running!"
 
 @app.route('/founder_data')
-def founder_data():
-    current_bal = wallets[FOUNDER_ADDR]['balance']
-    # حساب صافي الربح في الجلسة الحالية
-    session_profit = current_bal - START_BALANCE
+def get_founder_data():
     return jsonify({
-        "balance": round(current_bal, 6),
-        "session_profit": round(session_profit, 6)
+        "balance": wallets[FOUNDER_ADDR]['balance'],
+        "status": "Connected"
     })
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=10000)
+    # هذا التعديل يضمن أن السيرفر يفتح البورت الصحيح تلقائياً
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host='0.0.0.0', port=port)
