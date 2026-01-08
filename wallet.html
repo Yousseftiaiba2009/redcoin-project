@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redcoin RTC | User Wallet</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --red: #ff0000; --bg: #0b0e11; --card: #1e2329; --green: #0ecb81; --gray: #848e9c; }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
+        
+        /* Auth Screen (Login/Register) */
+        #auth-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+        .auth-card { background: var(--card); width: 100%; max-width: 400px; padding: 30px; border-radius: 15px; border-top: 3px solid var(--red); text-align: center; }
+        .input-style { width: 100%; padding: 12px; margin: 15px 0; background: #2b3139; border: 1px solid #444; border-radius: 8px; color: white; text-align: center; box-sizing: border-box; }
+        .btn-main { background: var(--red); color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+        /* Main Wallet UI (Hidden by default) */
+        #wallet-ui { display: none; }
+        .header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .logo-box { display: flex; align-items: center; gap: 10px; }
+        .logo-icon { background: var(--red); color: white; padding: 5px 10px; border-radius: 5px; font-weight: bold; }
+
+        .card { background: var(--card); margin: 20px; padding: 30px 20px; border-radius: 15px; border-bottom: 2px solid var(--red); box-shadow: 0 8px 16px rgba(0,0,0,0.4); }
+        .balance { font-size: 24px; font-weight: bold; margin: 10px 0; font-variant-numeric: tabular-nums; color: var(--green); }
+        .usd-val { color: var(--gray); font-size: 16px; font-weight: 600; }
+
+        .actions { display: flex; justify-content: space-around; margin: 30px 10px; }
+        .action-item { display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer; border: none; background: none; color: white; }
+        .icon-circle { width: 55px; height: 55px; background: #2b3139; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: 0.3s; }
+        .icon-circle.active { color: var(--red); border: 1px solid var(--red); }
+        .action-item span { font-size: 12px; color: var(--gray); }
+
+        /* Modal (Send Window) */
+        #send-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: var(--card); padding: 25px; border-radius: 15px; width: 100%; max-width: 350px; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div id="auth-screen">
+        <div class="auth-card">
+            <div style="font-size: 40px; color: var(--red); margin-bottom: 10px;"><i class="fa-solid fa-wallet"></i></div>
+            <h2 id="auth-title">تسجيل الدخول</h2>
+            <p style="color:var(--gray); font-size: 14px;">أدخل عنوان محفظتك للبدء</p>
+            <input type="text" id="wallet-input" class="input-style" placeholder="RTC-XXXX-XXXX">
+            <button class="btn-main" onclick="handleAuth()">دخول للمحفظة</button>
+            <p style="margin-top: 20px; font-size: 13px; color: var(--gray);">
+                ليس لديك حساب؟ <span style="color:var(--red); cursor:pointer;" onclick="toggleAuth()">إنشاء حساب جديد</span>
+            </p>
+        </div>
+    </div>
+
+    <div id="wallet-ui">
+        <div class="header">
+            <div class="logo-box">
+                <div class="logo-icon">R</div>
+                <div style="font-weight: bold; font-size: 18px;">Redcoin <span style="color:var(--red)">RTC</span></div>
+            </div>
+            <div id="status-dot" style="color:var(--green); font-size: 12px;"><i class="fa-solid fa-circle"></i> Online</div>
+        </div>
+
+        <div class="card">
+            <div style="color: var(--gray); font-size: 14px;">إجمالي الرصيد المتوفر</div>
+            <div class="balance" id="main-balance">0.00000000 RTC</div>
+            <div class="usd-val">≈ <span id="usd-value">$0.00</span></div>
+            <div id="addr-display" style="font-size: 10px; color: var(--gray); margin-top: 15px; background: #000; padding: 5px; display: inline-block; border-radius: 4px;"></div>
+        </div>
+
+        <div class="actions">
+            <button class="action-item" onclick="openSend()">
+                <div class="icon-circle active"><i class="fa-solid fa-paper-plane"></i></div>
+                <span>إرسال</span>
+            </button>
+            <button class="action-item" onclick="showReceive()">
+                <div class="icon-circle"><i class="fa-solid fa-download"></i></div>
+                <span>استقبال</span>
+            </button>
+            <button class="action-item" onclick="alert('خدمة المبادلة ستتوفر في المرحلة القادمة')">
+                <div class="icon-circle"><i class="fa-solid fa-sync"></i></div>
+                <span>مبادلة</span>
+            </button>
+            <button class="action-item" onclick="location.reload()">
+                <div class="icon-circle"><i class="fa-solid fa-right-from-bracket"></i></div>
+                <span>خروج</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="send-modal">
+        <div class="modal-content">
+            <h3 style="color:var(--red)">إرسال RTC</h3>
+            <input type="text" id="target-addr" class="input-style" placeholder="عنوان المستلم">
+            <input type="number" id="send-amount" class="input-style" placeholder="المبلغ">
+            <button class="btn-main" onclick="confirmSend()">تأكيد التحويل</button>
+            <button class="btn-main" style="background:#444; margin-top:10px;" onclick="closeModal()">إلغاء</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "https://rtc-miner-server.onrender.com";
+        let userAddr = "";
+
+        function toggleAuth() {
+            const title = document.getElementById('auth-title');
+            title.innerText = title.innerText === "تسجيل الدخول" ? "إنشاء حساب جديد" : "تسجيل الدخول";
+        }
+
+        async function handleAuth() {
+            userAddr = document.getElementById('wallet-input').value;
+            if(!userAddr) return alert("يرجى إدخال العنوان");
+            
+            try {
+                const res = await fetch(`${API_URL}/user_data/${userAddr}`);
+                if(res.ok) {
+                    document.getElementById('auth-screen').style.display = 'none';
+                    document.getElementById('wallet-ui').style.display = 'block';
+                    document.getElementById('addr-display').innerText = "ADDR: " + userAddr;
+                    fetchBalance();
+                    setInterval(fetchBalance, 5000);
+                }
+            } catch(e) { alert("خطأ في الاتصال بالسيرفر"); }
+        }
+
+        async function fetchBalance() {
+            try {
+                const res = await fetch(`${API_URL}/user_data/${userAddr}`);
+                const data = await res.json();
+                document.getElementById('main-balance').innerText = data.balance.toFixed(8) + " RTC";
+                document.getElementById('usd-value').innerText = "$" + (data.balance * 0.05).toFixed(2);
+            } catch(e) { console.log("Update Error"); }
+        }
+
+        function openSend() { document.getElementById('send-modal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('send-modal').style.display = 'none'; }
+        
+        function showReceive() { alert("عنوانك لاستلام RTC هو:\n" + userAddr); }
+
+        async function confirmSend() {
+            const target = document.getElementById('target-addr').value;
+            const amount = document.getElementById('send-amount').value;
+            if(!target || !amount) return alert("أكمل البيانات");
+
+            try {
+                const res = await fetch(`${API_URL}/send_crypto/${userAddr}/${target}/${amount}`, { method: 'POST' });
+                const data = await res.json();
+                if(data.status === "success") {
+                    alert("تم التحويل بنجاح!");
+                    closeModal();
+                    fetchBalance();
+                } else {
+                    alert("فشل: " + data.message);
+                }
+            } catch(e) { alert("خطأ في السيرفر"); }
+        }
+    </script>
+</body>
+</html>
