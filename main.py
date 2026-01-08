@@ -57,3 +57,18 @@ if __name__ == "__main__":
     # هذا التعديل يضمن أن السيرفر يفتح البورت الصحيح تلقائياً
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
+@app.route('/send_crypto/<sender>/<receiver>/<amount>', methods=['POST'])
+def send_crypto(sender, receiver, amount):
+    try:
+        amount = float(amount)
+        if sender in wallets and wallets[sender]['balance'] >= amount:
+            if receiver not in wallets:
+                wallets[receiver] = {"balance": 0.0}
+            
+            wallets[sender]['balance'] -= amount
+            wallets[receiver]['balance'] += amount
+            save_data()
+            return jsonify({"status": "success", "message": "تم التحويل بنجاح"})
+        return jsonify({"status": "error", "message": "رصيد غير كافٍ"})
+    except:
+        return jsonify({"status": "error", "message": "خطأ في العملية"})
